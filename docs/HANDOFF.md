@@ -19,8 +19,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - M1 slice 1 (parallel, disjoint files): `physics-specialist` → vehicle, terrain from JSON, eggs,
   breakage, fail/finish, events per `src/sim/types.ts`, headless level bot; `svg-artist` →
   pickup + egg + crate art v1 (DONE: pickup-body, wheel, egg, egg-cracked, egg-splat, crate, flag;
-  metre pivots documented at the top of `art/src/pickup-body.svg`); `sound-designer` → `src/audio/` engine/brake/impact/egg system +
-  `sound-lab.html` (dev only).
+  metre pivots documented at the top of `art/src/pickup-body.svg`); `sound-designer` → DONE: `src/audio/AudioSystem.ts` (+ `logic.ts`,
+  `src/data/audio.ts`), 24 procedurally generated sounds (143 KB), `sound-lab.html` (dev only).
 
 ## Next steps (in order)
 1. Finish M1 slice 1 (see In progress); commit each green part.
@@ -31,6 +31,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 4. Merge to `main`; user plays 3 levels on phone (portrait + landscape) and desktop.
 
 ## Waiting on humans
+- Sound Lab listen (`npm run dev` → `/sound-lab.html`): engine crossfades/loop clicks, rev/landing
+  dip, impact tiers, squeak, egg crack/splat, rattle level. All 24 sounds are synthetic.
 - Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
   Every push to `main` redeploys. User verified on iPhone 2026-10-19: portrait fills the screen,
   landscape letterboxes (390×520 centered) as intended. M0 phone test PASSED.
@@ -41,6 +43,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Audio: impulse tiers (2/12/35/90 N·s) and `wheelOmegaAtMax = 40` are guesses → tune against
+  real sim impulses when wiring. Stereo pan by screen x not built. kenney.nl / freesound.org are
+  blocked by the session proxy (403) → recorded CC0 sources would need network allowlisting.
 - Camera still not good enough for the user (2026-10-20, "hatalar var"): revisit in M1 with
   the vehicle; ask the user exactly when it looks wrong (fall, landing, resize?) and record video.
 - Landscape layouts (menus/HUD) need the user's approval via screenshots (portrait + landscape).
@@ -65,6 +70,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
+- 2026-10-20 Audio: all M1 sounds are our own procedural synthesis (`tools/audio.mjs`), MP3 only;
+  drop CC0 recordings into `audio/src` with the same names to replace them.
 - 2026-10-20 Camera feel rules (GDD §6 "Smoothness"): interpolation, critically damped follow,
   dead zone, zoom hysteresis; e2e guards it (`CAM_D2_MAX = 0.01`). Tune values in M1 with the vehicle.
 - 2026-10-20 Rendering: Phaser 4.2.1 has no `resolution` option → `Scale.NONE`, canvas backing

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sound Lab (dev)</title>
+    <!-- Dev-only page: served by `npm run dev` at /sound-lab.html. Not a Vite build input. -->
+    <style>
+      :root { --ink: #1E1B2E; --soft: #4A4560; --yellow: #FFC93C; --green: #4CC26B; --blue: #4FB3FF; }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 16px; background: #F4F1EA; color: var(--ink); font: 15px/1.4 system-ui, sans-serif; }
+      h1 { margin: 0 0 4px; font-size: 22px; }
+      h2 { margin: 0 0 8px; font-size: 16px; }
+      p.note { margin: 0 0 12px; color: var(--soft); }
+      section { background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+      .grid { display: flex; flex-wrap: wrap; gap: 6px; }
+      button { font: inherit; font-weight: 700; padding: 8px 10px; border: 3px solid var(--ink); border-radius: 10px; background: var(--yellow); color: var(--ink); cursor: pointer; }
+      button.alt { background: var(--blue); }
+      button.go { background: var(--green); }
+      button:active { transform: translateY(1px); }
+      label.row { display: grid; grid-template-columns: 120px 1fr 70px; gap: 8px; align-items: center; margin: 4px 0; }
+      input[type=range] { width: 100%; }
+      .readout { font-family: ui-monospace, monospace; color: var(--soft); white-space: pre; }
+      #unlock { position: fixed; inset: 0; background: rgba(30,27,46,.85); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <h1>Sound Lab</h1>
+    <p class="note">Dev only. Listen with headphones and on a phone speaker. Every sound here is procedurally generated (our own work).</p>
+    <div id="app"></div>
+    <div id="unlock">Tap to start audio</div>
+    <script type="module" src="/src/soundlab/main.ts"></script>
+  </body>
+</html>
