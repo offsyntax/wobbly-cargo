@@ -4,14 +4,14 @@ import { PPM } from '../sim/constants';
 import { FixedStepper, createWorld } from '../sim/world';
 import en from '../i18n/en.json';
 import { getPlatform } from '../platform';
-import { anchor, baseZoom, clamp, frameVertical } from '../render/camera';
+import { CameraRig, anchor, baseZoom, clamp } from '../render/camera';
+import { lerpPose, type Pose } from '../render/interp';
 import { safeInsets, viewMetrics } from '../render/view';
 import { attachHold } from '../input/hold';
 
 const INK = 0x1e1b2e;
 const HALF_WIDTH_M = 60; // ground strip spans x -60..+60 m
 const DROP_HEIGHT_M = 6; // box centre above the ground top at start
-const CAM_TAU_S = 0.15; // camera smoothing time constant
 const GROUND_Y_M = 0; // M1: terrain height under the vehicle
 const GROUND_DEPTH_M = 400; // far deeper than any portrait view shows below the vehicle
 
@@ -22,8 +22,10 @@ export class GameScene extends Phaser.Scene {
   private title!: Phaser.GameObjects.Text;
   private dot!: Phaser.GameObjects.Image;
   private firstFrame = true;
-  private camCenterY = 0;
-  private camZoomMul = 1;
+  private rig = new CameraRig();
+  private prevPose: Pose = { x: 0, y: 0, angle: 0 };
+  private currPose: Pose = { x: 0, y: 0, angle: 0 };
+  private camLogOn = new URLSearchParams(window.location.search).get('camlog') === '1';
   private userPaused = false;
   private platformPaused = false;
   private uiCam!: Phaser.Cameras.Scene2D.Camera;
@@ -58,6 +60,10 @@ export class GameScene extends Phaser.Scene {
     this.box.createFixture(new Box(0.5, 0.5), { density: 1, friction: 0.4, restitution: 0.3 });
     this.box.setAngularVelocity(2);
     this.stepper = new FixedStepper(world);
+    this.currPose = this.pose();
+    this.prevPose = this.currPose;
+    this.rig = new CameraRig();
+    this.boxGfx.setPosition(this.currPose.x * PPM, -this.currPose.y * PPM);
 
     // HUD lives on its own camera at zoom 1 (backing px); world objects are hidden from it.
     this.title = this.add
@@ -67,6 +73,8 @@ export class GameScene extends Phaser.Scene {
     this.uiObjs.push(this.title, this.dot);
 
     this.uiCam = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'ui');
+    this.cameras.main.roundPixels = false; // sub-pixel world rendering: no shimmer
+    this.uiCam.roundPixels = true; // HUD stays crisp
     this.cameras.main.ignore(this.uiObjs);
     this.uiCam.ignore(this.worldObjs);
 
@@ -110,7 +118,7 @@ export class GameScene extends Phaser.Scene {
     this.uiCam.setSize(pxW, pxH);
     this.uiCam.setZoom(1);
     this.uiCam.setScroll(0, 0);
-    this.followBox(0, true);
+    this.followBox(0, this.currPose, true);
 
     // HUD: edges plus safe-area insets, scaled by the short side (clamped).
     const s = clamp(Math.min(cssW, cssH) / 390, 0.85, 1.6) * dpr;
@@ -134,42 +142,58 @@ export class GameScene extends Phaser.Scene {
     };
   }
 
-  /** Frame the box (GDD section 6): smoothed vertical target, anchored x. snap = no smoothing (resize, first frame). */
-  private followBox(dt: number, snap = false): void {
+  private pose(): Pose {
+    const p = this.box.getPosition();
+    return { x: p.x, y: p.y, angle: this.box.getAngle() };
+  }
+
+  /** Frame the interpolated box (GDD section 6): spring-damped, dead zone, zoom hysteresis. snap = no smoothing. */
+  private followBox(dt: number, p: Pose, snap = false): void {
     const cam = this.cameras.main;
     const { cssW, cssH, dpr } = viewMetrics();
     const a = anchor(cssW, cssH);
     const bz = baseZoom(cssW, cssH);
-    const p = this.box.getPosition();
-    const t = frameVertical({
-      vehicleY: p.y,
-      groundY: GROUND_Y_M,
-      viewW: cssW,
-      viewH: cssH,
-      baseZoom: bz,
-      anchorY: a.y,
-      margin: 0.12,
-    });
-    const k = snap ? 1 : 1 - Math.exp(-dt / CAM_TAU_S);
-    this.camCenterY += (t.centerY - this.camCenterY) * k;
-    this.camZoomMul += (t.zoomMul - this.camZoomMul) * k;
-    cam.setZoom((bz * this.camZoomMul * dpr) / PPM);
-    // screen = (world - scroll - size/2) * zoom + size/2
-    cam.setScroll(
-      p.x * PPM - cam.width / 2 - ((a.x - 0.5) * cam.width) / cam.zoom,
-      -this.camCenterY * PPM - cam.height / 2,
+    this.rig.update(
+      dt,
+      {
+        vehicleX: p.x,
+        vehicleY: p.y,
+        groundY: GROUND_Y_M,
+        viewW: cssW,
+        viewH: cssH,
+        baseZoom: bz,
+        anchorX: a.x,
+        anchorY: a.y,
+        margin: 0.12,
+      },
+      snap,
     );
+    cam.setZoom((bz * this.rig.zoomMul * dpr) / PPM);
+    // screen = (world - scroll - size/2) * zoom + size/2; scroll is the top-left of the view at zoom 1 offsets
+    cam.setScroll(this.rig.x * PPM - cam.width / 2, -this.rig.y * PPM - cam.height / 2);
     const halfH = cam.height / cam.zoom / PPM / 2;
     window.__WC__.boxY = p.y;
-    window.__WC__.view = { top: this.camCenterY + halfH, bottom: this.camCenterY - halfH };
+    window.__WC__.view = { top: this.rig.y + halfH, bottom: this.rig.y - halfH };
   }
 
-  override update(_time: number, delta: number): void {
-    window.__WC__.simSteps += this.stepper.advance(delta / 1000);
-    const p = this.box.getPosition();
+  override update(time: number, delta: number): void {
+    const stepped = this.stepper.advance(delta / 1000, () => {
+      this.prevPose = this.currPose;
+      this.currPose = this.pose();
+    });
+    window.__WC__.simSteps += stepped;
+    const p = lerpPose(this.prevPose, this.currPose, this.stepper.alpha);
     this.boxGfx.setPosition(p.x * PPM, -p.y * PPM);
-    this.boxGfx.setRotation(-this.box.getAngle());
-    this.followBox(delta / 1000, this.firstFrame);
+    this.boxGfx.setRotation(-p.angle);
+    this.followBox(delta / 1000, p, this.firstFrame);
+
+    if (this.camLogOn) {
+      const cam = this.cameras.main;
+      const log = (window.__WC__.camLog ??= []);
+      if (log.length < 4000) {
+        log.push({ t: time, sx: cam.scrollX / PPM, sy: cam.scrollY / PPM, zoom: cam.zoom, boxY: p.y, ty: this.rig.targetY, steps: window.__WC__.simSteps });
+      }
+    }
 
     if (this.firstFrame) {
       this.firstFrame = false;

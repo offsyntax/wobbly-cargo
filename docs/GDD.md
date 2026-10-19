@@ -56,8 +56,12 @@ next level or garage upgrade → harder level / new world / new vehicle.
   (interpolate by aspect).
 - Dynamic look-ahead (velocity) and speed/air zoom (×0.75–×1.0) on top of the base zoom.
 - Airborne framing: keep the ground under the vehicle in view (frame vehicle + ground with
-  ~12% margins, zoom out down to ×0.75, smoothed ~0.15 s); if it still doesn't fit, the vehicle
-  stays fully visible and the ground may leave the bottom. Never cut off the vehicle.
+  ~12% margins, zoom out down to ×0.75); if it still doesn't fit, the vehicle stays fully
+  visible and the ground may leave the bottom. Never cut off the vehicle.
+- Smoothness (`CameraRig` in `src/render/camera.ts`): render interpolation between sim steps;
+  critically damped follow (x 0.25 s, y 0.45 s, zoom 0.8 s); vertical dead zone ±10% of view
+  height (bounces and suspension bobbing never move the camera); zoom-in only after the need
+  holds ≥ +0.05 for 0.5 s. Camera never rotates; screen shake only as a deliberate effect (M3).
 - On resize/rotation: recompute zoom and UI layout in the same frame; never restart the level.
 - Parallax: sky (static), skyline/dunes (0.2), far hills (0.45), terrain (1.0). Layers tile
   horizontally and cover the tallest portrait view.

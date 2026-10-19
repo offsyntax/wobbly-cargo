@@ -6,7 +6,7 @@ import { viewMetrics } from './render/view';
 
 declare global {
   interface Window {
-    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number }; view: { top: number; bottom: number }; boxY: number };
+    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number }; view: { top: number; bottom: number }; boxY: number; camLog?: { t: number; sx: number; sy: number; zoom: number; boxY: number; ty: number; steps: number }[] };
   }
 }
 
@@ -21,6 +21,7 @@ const game = new Phaser.Game({
   width: m0.pxW,
   height: m0.pxH,
   backgroundColor: '#9ED8F5',
+  render: { roundPixels: false },
   scale: { mode: Phaser.Scale.NONE },
   input: { activePointers: 2 },
   scene: [BootScene, PreloadScene, GameScene],
