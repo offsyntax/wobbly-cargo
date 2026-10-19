@@ -5,8 +5,7 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-19 · Milestone: **M0 done** (on branch `claude/intelligent-ritchie-e4z909`;
-  phone link goes live once merged to `main` + Pages enabled) · Next: **M1 Core feel**
+- Date: 2026-10-19 · Milestone: **M0 done** (merged to `main`, deployed to Pages) · Next: **M1 Core feel**
 - Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Blank Game scene (ground, falling planck
   box, atlas test sprite) at 390×844 FIT/letterbox. Platform interface + `local` adapter (saves,
   pause/resume, ad stubs). All scripts exist and pass: `check` (9 unit tests, dist 1.51 MB),
@@ -29,9 +28,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Then cargo (eggs) + breakage, finish/fail detection, art v1, core audio + Sound Lab (§11).
 
 ## Waiting on humans
-- User: make the repo public (Settings → General → Change visibility), then Settings → Pages →
-  Source: **GitHub Actions**. Then re-run the "Deploy to GitHub Pages" workflow on `main`
-  (workflow_dispatch) → https://offsyntax.github.io/wobbly-cargo/
+- Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
+  Every push to `main` redeploys. Verified on desktop by the user.
 - Phone smoke test of that link (game loads, letterboxed, box falls onto ground).
 - Playgama / Mediacube replies (payout terms, Türkiye eligibility, revenue per 1,000 plays).
 
