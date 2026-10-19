@@ -64,6 +64,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
+- 2026-10-20 Camera feel rules (GDD §6 "Smoothness"): interpolation, critically damped follow,
+  dead zone, zoom hysteresis; e2e guards it (`CAM_D2_MAX = 0.01`). Tune values in M1 with the vehicle.
 - 2026-10-20 Rendering: Phaser 4.2.1 has no `resolution` option → `Scale.NONE`, canvas backing
   store = CSS size × min(DPR, 2), world zoom = baseZoom·dpr/PPM, HUD on a zoom-1 UI camera.
   Anchor y interpolates on log(aspect) (0.55 at ≥16:9 … 0.62 at ≤9:16).
@@ -87,6 +89,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · camera smoothness · User: camera felt wobbly/shaky. Added render interpolation
+  (`src/render/interp.ts`), `CameraRig` (smoothDamp, ±10% dead zone, zoom hysteresis), e2e
+  `camera smoothness` (max |Δ² scrollY| 0.022 → 0.0046). Merged to main. Next: user re-test, M1.
 - 2026-10-20 · camera fix · User: no ground visible while airborne on desktop. Added
   `frameVertical()` (frames vehicle + ground, zoom ≥ ×0.75, 0.15 s smoothing; `GROUND_Y_M` →
   terrain height in M1), drop height 6 m, e2e 12/12. Merged to main. Next: user re-test, M1.

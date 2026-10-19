@@ -66,3 +66,119 @@ export function frameVertical(i: FrameInput): { centerY: number; zoomMul: number
   if (needH <= h + 1e-9) return { centerY: (i.vehicleY + i.groundY) / 2, zoomMul };
   return { centerY: i.vehicleY + m * h - h / 2, zoomMul };
 }
+
+/** Unity-style critically damped spring. Never overshoots `target`; velocity is carried by the caller. */
+export function smoothDamp(
+  current: number,
+  target: number,
+  velocity: number,
+  smoothTime: number,
+  dt: number,
+): { value: number; velocity: number } {
+  const st = Math.max(0.0001, smoothTime);
+  const omega = 2 / st;
+  const x = omega * dt;
+  const e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+  const change = current - target;
+  const temp = (velocity + omega * change) * dt;
+  let vel = (velocity - omega * temp) * e;
+  let out = target + (change + temp) * e;
+  if (target - current > 0 === out > target) {
+    out = target;
+    vel = 0;
+  }
+  return { value: out, velocity: vel };
+}
+
+export const SMOOTH_X_S = 0.25;
+export const SMOOTH_Y_S = 0.45;
+export const SMOOTH_ZOOM_S = 0.8;
+/** Vertical dead zone: half band as a fraction of the view height. */
+export const DEAD_ZONE_FRAC = 0.1;
+export const ZOOM_IN_MARGIN = 0.05;
+export const ZOOM_IN_HOLD_S = 0.5;
+
+/** Moves `target` only when `desired` leaves target +- halfBand (then drags it along the band edge). */
+export function deadZone(target: number, desired: number, halfBand: number): number {
+  if (desired > target + halfBand) return desired - halfBand;
+  if (desired < target - halfBand) return desired + halfBand;
+  return target;
+}
+
+export interface ZoomHold {
+  /** Held zoom multiplier target. */
+  held: number;
+  /** Seconds the needed zoom has stayed >= held + margin. */
+  timer: number;
+}
+
+/**
+ * Zoom hysteresis. Zooming out (needed < held) is immediate; zooming back in only after the needed
+ * multiplier has stayed >= held + 0.05 (or the max, if closer) for 0.5 s.
+ */
+export function stepZoomHold(s: ZoomHold, needed: number, dt: number): ZoomHold {
+  if (needed < s.held) return { held: needed, timer: 0 };
+  const margin = Math.min(ZOOM_IN_MARGIN, ZOOM_MUL_MAX - s.held);
+  if (margin > 0 && needed >= s.held + margin) {
+    const timer = s.timer + dt;
+    return timer >= ZOOM_IN_HOLD_S ? { held: needed, timer: 0 } : { held: s.held, timer };
+  }
+  return { held: s.held, timer: 0 };
+}
+
+/** View-centre y (m) for framing the vehicle at a fixed zoom multiplier (same rules as frameVertical). */
+export function centerAtZoom(i: FrameInput, zoomMul: number): number {
+  const m = i.margin ?? 0.12;
+  const h = i.viewH / (i.baseZoom * zoomMul);
+  const height = Math.max(0, i.vehicleY - i.groundY);
+  if (height <= (1 - i.anchorY - m) * h) return i.vehicleY + (i.anchorY - 0.5) * h;
+  if (height / (1 - 2 * m) <= h + 1e-9) return (i.vehicleY + i.groundY) / 2;
+  return i.vehicleY + m * h - h / 2;
+}
+
+export interface RigInput extends FrameInput {
+  vehicleX: number;
+  /** Vehicle screen x as a fraction of view width. */
+  anchorX: number;
+}
+
+/** Camera state: spring-followed centre (m, y up) and zoom multiplier. Pure; feed it the INTERPOLATED vehicle. */
+export class CameraRig {
+  x = 0;
+  y = 0;
+  zoomMul = 1;
+  private vx = 0;
+  private vy = 0;
+  private vz = 0;
+  private hold: ZoomHold = { held: 1, timer: 0 };
+  /** Dead-zone-filtered y target (m), before the spring. */
+  targetY = 0;
+
+  update(dt: number, i: RigInput, snap = false): void {
+    const needed = frameVertical(i).zoomMul;
+    const viewWm = (mul: number): number => i.viewW / (i.baseZoom * mul);
+    if (snap) {
+      this.hold = { held: needed, timer: 0 };
+      this.zoomMul = needed;
+      this.targetY = this.y = centerAtZoom(i, needed);
+      this.x = i.vehicleX - (i.anchorX - 0.5) * viewWm(needed);
+      this.vx = this.vy = this.vz = 0;
+      return;
+    }
+    const d = clamp(dt, 0, 0.1);
+    this.hold = stepZoomHold(this.hold, needed, d);
+    const held = this.hold.held;
+    const band = (DEAD_ZONE_FRAC * i.viewH) / (i.baseZoom * held);
+    this.targetY = deadZone(this.targetY, centerAtZoom(i, held), band);
+    const tx = i.vehicleX - (i.anchorX - 0.5) * viewWm(this.zoomMul);
+    const sx = smoothDamp(this.x, tx, this.vx, SMOOTH_X_S, d);
+    const sy = smoothDamp(this.y, this.targetY, this.vy, SMOOTH_Y_S, d);
+    const sz = smoothDamp(this.zoomMul, held, this.vz, SMOOTH_ZOOM_S, d);
+    this.x = sx.value;
+    this.vx = sx.velocity;
+    this.y = sy.value;
+    this.vy = sy.velocity;
+    this.zoomMul = sz.value;
+    this.vz = sz.velocity;
+  }
+}

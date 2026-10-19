@@ -17,7 +17,7 @@ export class FixedStepper {
   ) {}
 
   /** Advance by frameSeconds of real time; returns number of sim steps taken. */
-  advance(frameSeconds: number): number {
+  advance(frameSeconds: number, onStep?: () => void): number {
     if (this.paused) return 0;
     this.acc += Math.max(0, frameSeconds);
     let steps = 0;
@@ -25,6 +25,7 @@ export class FixedStepper {
       this.world.step(this.dt, VEL_ITERS, POS_ITERS);
       this.acc -= this.dt;
       steps++;
+      onStep?.();
     }
     // Drop backlog beyond the clamp so we never spiral.
     if (steps === this.maxSteps && this.acc >= this.dt) this.acc = 0;
