@@ -29,9 +29,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Then cargo (eggs) + breakage, finish/fail detection, art v1, core audio + Sound Lab (§11).
 
 ## Waiting on humans
-- Merge the branch to `main`, then Settings → Pages → Source: **GitHub Actions**. The
-  workflow `.github/workflows/pages.yml` deploys `main` to
-  https://offsyntax.github.io/wobbly-cargo/ (Pages on a private repo needs a paid plan).
+- User: make the repo public (Settings → General → Change visibility), then Settings → Pages →
+  Source: **GitHub Actions**. Then re-run the "Deploy to GitHub Pages" workflow on `main`
+  (workflow_dispatch) → https://offsyntax.github.io/wobbly-cargo/
 - Phone smoke test of that link (game loads, letterboxed, box falls onto ground).
 - Playgama / Mediacube replies (payout terms, Türkiye eligibility, revenue per 1,000 plays).
 
@@ -58,6 +58,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   `playwright install`). Art pipeline: resvg + sharp, own shelf packer, atlas committed.
 - 2026-10-19 Platform: game code only uses `getPlatform()` from `src/platform`; `local` adapter
   for dev, `playables`/`playgama` in M3.
+- 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
+- 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
 - 2026-10-19 Sim stepper clamps at 5 steps/frame and drops extra backlog (no spiral of death).
 
 ## Key files
