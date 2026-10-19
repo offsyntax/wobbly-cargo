@@ -17,7 +17,6 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 
 ## In progress
 - M1 slice 2 (`ui-builder`): wire `GameSim` + art + `AudioSystem` into GameScene.
-- M1 slice 3 (`level-designer`): `src/levels/city-01..03.json`.
 
 ## Next steps (in order)
 1. M1 slice 1 DONE: `src/sim/{level,vehicle,cargo,game}.ts` (`GameSim` API: step/drainEvents/
@@ -26,7 +25,7 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 2. M1 slice 2 (`ui-builder`): GameScene draws terrain/vehicle/eggs/flag from sim, camera uses
    `VehicleTelemetry` (groundY, look-ahead, speed/air zoom), minimal HUD, fail/complete overlay +
    instant retry, audio hooked to events/telemetry.
-3. M1 slice 3 (`level-designer`): `city-01..03` per GDD difficulty curve; `levels:verify` ≥ 2 stars.
+3. M1 slice 3 DONE: `city-01..03` (140/210/245 m, bot 3★ each, par 25/40/38 s).
 4. Merge to `main`; user plays 3 levels on phone (portrait + landscape) and desktop.
 
 ## Waiting on humans
@@ -42,6 +41,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Levels may be too forgiving: holding all the time never breaks an egg on city-01..03 (only
+  damage). Fine for teaching levels; confirm with the user's playtest.
 - Physics: a 1.5 m ramp onto flat ground breaks eggs at any speed → levels need downslope
   landings. Eggs survive a 4 m hill ≤ 7 m/s, crack at ≥ 9 m/s.
 - Audio: impulse tiers (2/12/35/90 N·s) and `wheelOmegaAtMax = 40` are guesses → tune against
