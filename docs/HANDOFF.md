@@ -19,8 +19,7 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Camera fix (`ui-builder`): user saw no ground while the box was airborne on desktop.
-  `frameVertical()` in `src/render/camera.ts` frames vehicle + ground (zoom ≥ ×0.75), GDD §6 updated.
+- Nothing.
 
 ## Next steps (in order)
 1. User tests https://offsyntax.github.io/wobbly-cargo/ on the phone in portrait + landscape and on
@@ -88,6 +87,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · camera fix · User: no ground visible while airborne on desktop. Added
+  `frameVertical()` (frames vehicle + ground, zoom ≥ ×0.75, 0.15 s smoothing; `GROUND_Y_M` →
+  terrain height in M1), drop height 6 m, e2e 12/12. Merged to main. Next: user re-test, M1.
 - 2026-10-20 · direction change · User: responsive full-viewport, no longer portrait-first.
   Docs updated (CLAUDE.md 4/8, GDD §1/4/6/13/14/15/17, ui-builder, reference README). Code:
   `src/render/{camera,view}.ts`, `src/input/hold.ts`, GameScene/main rewritten, e2e 10/10.

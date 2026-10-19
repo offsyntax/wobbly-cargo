@@ -4,12 +4,15 @@ import { PPM } from '../sim/constants';
 import { FixedStepper, createWorld } from '../sim/world';
 import en from '../i18n/en.json';
 import { getPlatform } from '../platform';
-import { anchor, baseZoom, clamp } from '../render/camera';
+import { anchor, baseZoom, clamp, frameVertical } from '../render/camera';
 import { safeInsets, viewMetrics } from '../render/view';
 import { attachHold } from '../input/hold';
 
 const INK = 0x1e1b2e;
 const HALF_WIDTH_M = 60; // ground strip spans x -60..+60 m
+const DROP_HEIGHT_M = 6; // box centre above the ground top at start
+const CAM_TAU_S = 0.15; // camera smoothing time constant
+const GROUND_Y_M = 0; // M1: terrain height under the vehicle
 const GROUND_DEPTH_M = 400; // far deeper than any portrait view shows below the vehicle
 
 export class GameScene extends Phaser.Scene {
@@ -19,6 +22,8 @@ export class GameScene extends Phaser.Scene {
   private title!: Phaser.GameObjects.Text;
   private dot!: Phaser.GameObjects.Image;
   private firstFrame = true;
+  private camCenterY = 0;
+  private camZoomMul = 1;
   private userPaused = false;
   private platformPaused = false;
   private uiCam!: Phaser.Cameras.Scene2D.Camera;
@@ -49,7 +54,7 @@ export class GameScene extends Phaser.Scene {
     const world = createWorld();
     const ground = world.createBody();
     ground.createFixture(new Box(HALF_WIDTH_M, 1, new Vec2(0, -1), 0));
-    this.box = world.createBody({ type: 'dynamic', position: new Vec2(0, 12) });
+    this.box = world.createBody({ type: 'dynamic', position: new Vec2(0, DROP_HEIGHT_M) });
     this.box.createFixture(new Box(0.5, 0.5), { density: 1, friction: 0.4, restitution: 0.3 });
     this.box.setAngularVelocity(2);
     this.stepper = new FixedStepper(world);
@@ -105,8 +110,7 @@ export class GameScene extends Phaser.Scene {
     this.uiCam.setSize(pxW, pxH);
     this.uiCam.setZoom(1);
     this.uiCam.setScroll(0, 0);
-    this.cameras.main.setZoom((baseZoom(cssW, cssH) * dpr) / PPM);
-    this.followBox();
+    this.followBox(0, true);
 
     // HUD: edges plus safe-area insets, scaled by the short side (clamped).
     const s = clamp(Math.min(cssW, cssH) / 390, 0.85, 1.6) * dpr;
@@ -130,18 +134,34 @@ export class GameScene extends Phaser.Scene {
     };
   }
 
-  /** Place the box at the anchor: screen = (world - scroll - size/2) * zoom + size/2. */
-  private followBox(): void {
+  /** Frame the box (GDD section 6): smoothed vertical target, anchored x. snap = no smoothing (resize, first frame). */
+  private followBox(dt: number, snap = false): void {
     const cam = this.cameras.main;
-    const { cssW, cssH } = viewMetrics();
+    const { cssW, cssH, dpr } = viewMetrics();
     const a = anchor(cssW, cssH);
+    const bz = baseZoom(cssW, cssH);
     const p = this.box.getPosition();
-    const wx = p.x * PPM;
-    const wy = -p.y * PPM;
+    const t = frameVertical({
+      vehicleY: p.y,
+      groundY: GROUND_Y_M,
+      viewW: cssW,
+      viewH: cssH,
+      baseZoom: bz,
+      anchorY: a.y,
+      margin: 0.12,
+    });
+    const k = snap ? 1 : 1 - Math.exp(-dt / CAM_TAU_S);
+    this.camCenterY += (t.centerY - this.camCenterY) * k;
+    this.camZoomMul += (t.zoomMul - this.camZoomMul) * k;
+    cam.setZoom((bz * this.camZoomMul * dpr) / PPM);
+    // screen = (world - scroll - size/2) * zoom + size/2
     cam.setScroll(
-      wx - cam.width / 2 - ((a.x - 0.5) * cam.width) / cam.zoom,
-      wy - cam.height / 2 - ((a.y - 0.5) * cam.height) / cam.zoom,
+      p.x * PPM - cam.width / 2 - ((a.x - 0.5) * cam.width) / cam.zoom,
+      -this.camCenterY * PPM - cam.height / 2,
     );
+    const halfH = cam.height / cam.zoom / PPM / 2;
+    window.__WC__.boxY = p.y;
+    window.__WC__.view = { top: this.camCenterY + halfH, bottom: this.camCenterY - halfH };
   }
 
   override update(_time: number, delta: number): void {
@@ -149,7 +169,7 @@ export class GameScene extends Phaser.Scene {
     const p = this.box.getPosition();
     this.boxGfx.setPosition(p.x * PPM, -p.y * PPM);
     this.boxGfx.setRotation(-this.box.getAngle());
-    this.followBox();
+    this.followBox(delta / 1000, this.firstFrame);
 
     if (this.firstFrame) {
       this.firstFrame = false;

@@ -132,3 +132,32 @@ test.describe('touch', () => {
     expect(await page.evaluate(() => window.__WC__.held)).toBe(false);
   });
 });
+
+for (const { w, h } of [{ w: 1920, h: 1080 }, { w: 844, h: 390 }]) {
+  test(`airborne: ground and box visible ${w}x${h}`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/');
+    await page.waitForFunction(() => window.__WC__?.ready === true);
+    const samples: { steps: number; top: number; bottom: number; boxY: number }[] = [];
+    for (let i = 0; i < 40; i++) {
+      const s = await page.evaluate(() => ({
+        steps: window.__WC__.simSteps,
+        top: window.__WC__.view.top,
+        bottom: window.__WC__.view.bottom,
+        boxY: window.__WC__.boxY,
+      }));
+      if (s.steps >= 40) break;
+      samples.push(s);
+      if (samples.length === 3) await page.screenshot({ path: `test-results/air-${w}x${h}.png` });
+      await page.waitForTimeout(15);
+    }
+    expect(samples.length).toBeGreaterThan(0);
+    for (const s of samples) {
+      expect(s.bottom).toBeLessThanOrEqual(0);
+      expect(s.top).toBeGreaterThanOrEqual(0);
+      expect(s.boxY).toBeGreaterThan(0.5);
+      expect(s.boxY).toBeLessThanOrEqual(s.top);
+      expect(s.boxY).toBeGreaterThanOrEqual(s.bottom);
+    }
+  });
+}
