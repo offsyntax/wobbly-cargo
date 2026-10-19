@@ -29,8 +29,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 
 ## Waiting on humans
 - Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
-  Every push to `main` redeploys. Verified on desktop and iPhone by the user; side bars on the
-  phone fixed by adaptive height → user re-checks the phone after the redeploy.
+  Every push to `main` redeploys. User verified on iPhone 2026-10-19: portrait fills the screen,
+  landscape letterboxes (390×520 centered) as intended. M0 phone test PASSED.
 - Phone smoke test of that link (game loads, letterboxed, box falls onto ground).
 - Playgama / Mediacube replies (payout terms, Türkiye eligibility, revenue per 1,000 plays).
 
@@ -38,6 +38,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Landscape shows a small 390×520 letterboxed view. Decide in M1 (with the camera) whether
+  landscape should instead widen the visible road; ask the user (affects platform constraint 4).
 - No web fonts yet (system sans-serif); bundle Lilita One + Nunito in `public/fonts` in M1/M2.
 
 ## Decisions (do not revisit without the user)
@@ -77,7 +79,7 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 ## Session log (newest first, max 10 entries; 3–5 lines each)
 - 2026-10-19 · M0 follow-up · Repo public, Pages live, PR #1 merged. iPhone showed side bars →
   adaptive logical height (fills phones, letterboxes wide screens), e2e checks 390×664 fill.
-  Next: user phone re-check, then M1 vehicle physics.
+  User re-checked on iPhone: OK. Next: M1 vehicle physics.
 - 2026-10-19 · M0 · Hooks chmod +x; scaffold (`src/sim` FixedStepper + tests, Boot/Preload/Game
   scenes, size check), platform `local` adapter, Playwright e2e, art pipeline, Pages workflow,
   stub scripts. M0 done · next: M1 vehicle physics · blocker: merge + enable Pages ·
