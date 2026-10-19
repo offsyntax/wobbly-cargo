@@ -10,8 +10,9 @@ export class FixedStepper {
   private acc = 0;
   paused = false;
 
+  /** `source` is a bare planck World, or a callback that advances exactly one fixed step (e.g. GameSim.step). */
   constructor(
-    readonly world: World,
+    readonly source: World | (() => void),
     readonly dt = FIXED_DT,
     readonly maxSteps = MAX_STEPS_PER_FRAME,
   ) {}
@@ -22,7 +23,8 @@ export class FixedStepper {
     this.acc += Math.max(0, frameSeconds);
     let steps = 0;
     while (this.acc >= this.dt && steps < this.maxSteps) {
-      this.world.step(this.dt, VEL_ITERS, POS_ITERS);
+      if (typeof this.source === 'function') this.source();
+      else this.source.step(this.dt, VEL_ITERS, POS_ITERS);
       this.acc -= this.dt;
       steps++;
       onStep?.();

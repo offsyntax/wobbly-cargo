@@ -67,7 +67,7 @@ export const PICKUP_ENGINE: EngineProfile = {
   maxRpm: 6500,
   minRate: 0.8,
   maxRate: 1.8,
-  wheelOmegaAtMax: 40,
+  wheelOmegaAtMax: 31,
   holdBoost: 0.18,
   tauRise: 0.22,
   tauRiseAir: 0.07,
@@ -89,17 +89,18 @@ export const ENGINE_PROFILES: Record<string, EngineProfile> = { pickup: PICKUP_E
 export type ImpactTier = 'soft' | 'medium' | 'hard';
 
 /**
- * Impulse thresholds (N·s) for land/bump tiers. Placeholder values until the vehicle physics
- * lands: tune with the Sound Lab "simulate drive" and real sim logs.
+ * Impulse thresholds (N·s) for land/bump tiers, tuned from headless bot runs on test-01 + city-01..03
+ * (ground cap 7 m/s and full throttle): non-cargo impacts p50 1.9, p95 4.0-4.3, p99 about 10.
+ * Event floors in vehicles.ts (impactMin 0.6-1.5, landMin 0.8) decide what reaches the audio at all.
  */
 export const IMPACT_TIERS = {
   /** Below this nothing plays. */
-  min: 2,
+  min: 0.8,
   /** soft: [min, medium) · medium: [medium, hard) · hard: [hard, ∞) */
-  medium: 12,
-  hard: 35,
+  medium: 1.9,
+  hard: 4,
   /** Impulse that reaches full volume in the hard tier. */
-  max: 90,
+  max: 12,
 };
 
 export const IMPACT_SOUNDS: Record<ImpactTier, string[]> = {

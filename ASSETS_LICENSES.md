@@ -16,7 +16,10 @@ license, modifications.
 
 | File | Font | Author | Source | License |
 |---|---|---|---|---|
-| (none bundled yet: Lilita One + Nunito planned, both SIL OFL 1.1) | | | | |
+| `public/fonts/lilita-one-latin-400-normal.woff2` | Lilita One 400 (latin subset) | Juan Montoreano | https://fonts.google.com/specimen/Lilita+One (woff2 from npm `@fontsource/lilita-one` 5.3.0) | SIL OFL 1.1 |
+| `public/fonts/nunito-latin-700-normal.woff2`, `nunito-latin-800-normal.woff2` | Nunito 700 / 800 (latin subset) | The Nunito Project Authors | https://fonts.google.com/specimen/Nunito (woff2 from npm `@fontsource/nunito` 5.3.0) | SIL OFL 1.1 |
+
+Unmodified woff2 files as shipped by Fontsource. Both OFL texts: `public/fonts/OFL.txt`.
 
 ## Audio
 

@@ -3,14 +3,9 @@ import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { GameScene } from './scenes/GameScene';
 import { viewMetrics } from './render/view';
+import { initDebug } from './debug';
 
-declare global {
-  interface Window {
-    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number }; view: { top: number; bottom: number }; boxY: number; camLog?: { t: number; sx: number; sy: number; zoom: number; boxY: number; ty: number; steps: number }[] };
-  }
-}
-
-window.__WC__ = { ready: false, scene: '', held: false, paused: false, simSteps: 0, hud: { x: 0, y: 0, w: 0, h: 0 }, view: { top: 0, bottom: 0 }, boxY: 0 };
+window.__WC__ = initDebug();
 
 // Full-viewport canvas: backing store = CSS size x DPR (capped at 2); CSS stretches it to 100% of #game
 // (same size, so it is never upscaled). Scale.NONE + our own resize keeps the backing size exact.

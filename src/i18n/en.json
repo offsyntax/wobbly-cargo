@@ -1,3 +1,29 @@
 {
-  "game": { "title": "Wobbly Cargo", "m0": "Wobbly Cargo — M0" }
+  "game": { "title": "Wobbly Cargo" },
+  "hud": {
+    "level": "LEVEL {n}",
+    "cargo": "CARGO",
+    "holdToDrive": "HOLD TO DRIVE",
+    "orSpace": "or press Space"
+  },
+  "fail": {
+    "cargo": "CARGO CRACKED!",
+    "flipped": "FLIPPED!",
+    "fell": "FELL OFF!",
+    "progress": "You made it {pct}% of the way",
+    "retry": "RETRY"
+  },
+  "complete": {
+    "title": "LEVEL COMPLETE",
+    "time": "Time",
+    "cargo": "Cargo safe",
+    "cargoValue": "{n} / {total} eggs",
+    "next": "NEXT",
+    "retry": "RETRY"
+  },
+  "pause": {
+    "title": "PAUSED",
+    "resume": "RESUME",
+    "restart": "RESTART"
+  }
 }

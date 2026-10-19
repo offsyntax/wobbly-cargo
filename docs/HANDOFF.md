@@ -5,28 +5,29 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-20 · Milestone: **M1 Core feel in progress** (M0 done, responsive + camera work on `main`)
-- Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Full-viewport canvas (Scale.NONE, manual
-  resize, backing store × min(DPR, 2)); `CameraRig` (GDD §6); HUD on a UI camera with safe-area
-  insets; hold input (touch/mouse/Space/↑), Esc/P pause; live resize keeps state. Sim ↔ consumer
-  contract: `src/sim/types.ts` (SimInput, SimEvent, VehicleTelemetry). All scripts pass.
+- Date: 2026-10-20 · Milestone: **M1 Core feel — playable build, waiting for the user's playtest**
+- Summary: 3 City levels playable end to end: Pickup with suspension, hold to drive/brake, air
+  rotation, 3 eggs with damage/break/lost, fail (cargo/flipped/fell) + complete overlays with
+  instant retry, HUD (pause, level pill, progress, cargo meter, HOLD TO DRIVE hint), parallax,
+  responsive camera with look-ahead + speed/air zoom, procedural audio wired to sim, bundled
+  Lilita One + Nunito. check 70 tests · levels:verify 4/4 3★ · e2e 19/19 · dist 1.77 MB.
 
 ## Milestones
 - [x] M0 Setup · [ ] M1 Core feel · [ ] M2 Content & meta · [ ] M3 Polish & platform ·
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- M1 slice 2 (`ui-builder`): wire `GameSim` + art + `AudioSystem` into GameScene.
+- Nothing.
 
 ## Next steps (in order)
-1. M1 slice 1 DONE: `src/sim/{level,vehicle,cargo,game}.ts` (`GameSim` API: step/drainEvents/
-   telemetry/cargoState/bodies), data in `src/data/{vehicles,cargo}.ts`, bot `npm run levels:verify`
-   (tsx; policy: hold < 7 m/s on ground, in air hold while nose < 0.2 rad).
-2. M1 slice 2 (`ui-builder`): GameScene draws terrain/vehicle/eggs/flag from sim, camera uses
-   `VehicleTelemetry` (groundY, look-ahead, speed/air zoom), minimal HUD, fail/complete overlay +
-   instant retry, audio hooked to events/telemetry.
-3. M1 slice 3 DONE: `city-01..03` (140/210/245 m, bot 3★ each, par 25/40/38 s).
-4. Merge to `main`; user plays 3 levels on phone (portrait + landscape) and desktop.
+1. User playtests https://offsyntax.github.io/wobbly-cargo/ (phone portrait + landscape, desktop):
+   driving feel, egg fragility, camera, sounds. Collect concrete notes (what, when, which level).
+2. Tune from the notes: driving feel → `physics-specialist` (`src/data/vehicles.ts`, `cargo.ts`);
+   camera → `src/render/camera.ts` constants; levels → `level-designer`; sounds → `sound-designer`.
+3. Sound Lab is dev-only (`npm run dev` → `/sound-lab.html`); if the user can't run dev, propose a
+   Pages-only build mode that also ships `sound-lab.html` (never in `npm run zip`).
+4. M1 is done when the user says the driving "feels good" in both orientations + desktop and
+   rotating mid-level keeps the run. Then M2 (GDD §13).
 
 ## Waiting on humans
 - Sound Lab listen (`npm run dev` → `/sound-lab.html`): engine crossfades/loop clicks, rev/landing
@@ -45,8 +46,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   damage). Fine for teaching levels; confirm with the user's playtest.
 - Physics: a 1.5 m ramp onto flat ground breaks eggs at any speed → levels need downslope
   landings. Eggs survive a 4 m hill ≤ 7 m/s, crack at ≥ 9 m/s.
-- Audio: impulse tiers (2/12/35/90 N·s) and `wheelOmegaAtMax = 40` are guesses → tune against
-  real sim impulses when wiring. Stereo pan by screen x not built. kenney.nl / freesound.org are
+- Audio: impact tiers tuned from bot runs (0.8/1.9/4/12 N·s, `wheelOmegaAtMax` 31); the bot rarely
+  lands hard → retune the hard tier from human runs. Stereo pan by screen x not built. kenney.nl / freesound.org are
   blocked by the session proxy (403) → recorded CC0 sources would need network allowlisting.
 - Camera still not good enough for the user (2026-10-20, "hatalar var"): revisit in M1 with
   the vehicle; ask the user exactly when it looks wrong (fall, landing, resize?) and record video.
@@ -101,6 +102,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · M1 playable · GameScene wired (`src/render/worldRenderer.ts`, `src/ui/{kit,Hud,
+  Overlay}.ts`, `src/levels/index.ts`), fonts bundled, atlas @3x, audio tiers tuned. All checks
+  green. Merged to main for the playtest. Next: user notes → tuning.
 - 2026-10-20 · M1 sim · `GameSim` + Pickup + eggs + rules + bot; check 66 tests, test-01 3★ 17.8 s.
   Next: GameScene wiring (ui-builder) + city-01..03 (level-designer) in parallel.
 - 2026-10-20 · M1 start · User: camera still not good, postpone, continue M1. Added sim contract

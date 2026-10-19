@@ -6,7 +6,7 @@ import sharp from 'sharp';
 
 const SRC = 'art/src';
 const OUT = 'public/atlas';
-const SCALE = 2;
+const SCALE = 3;
 const PAD = 2;
 const MAX = 2048;
 
