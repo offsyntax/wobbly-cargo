@@ -17,7 +17,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - M0 slice 2: platform adapter (`local`), e2e (Playwright), art pipeline skeleton, remaining scripts.
 
 ## Next steps (in order)
-1. M0 slice 2 (see In progress), then slice 3: GitHub Pages deploy workflow.
+1. Finish M0 slice 2 (see In progress). Pages workflow `.github/workflows/pages.yml` exists
+   (deploys `main` after `npm run check`).
 
 ## Waiting on humans
 - Playgama / Mediacube replies (payout terms, Türkiye eligibility, revenue per 1,000 plays).
