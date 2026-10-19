@@ -1,5 +1,27 @@
 {
   "model": "claude-opus-5-5",
   "effortLevel": "high",
-  "ultracode": false
+  "ultracode": false,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-check.sh\""
+          }
+        ]
+      }
+    ]
+  }
 }

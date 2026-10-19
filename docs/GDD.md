@@ -201,8 +201,10 @@ Model/effort guidance per milestone is in §16.
 **M0 — Setup (½ day)**
 Vite + TS + Phaser + planck project, folder structure from CLAUDE.md, `npm run check` / `size` /
 `e2e` scripts, platform adapter with `local` implementation, art pipeline skeleton, GitHub Pages
-(or equivalent) deploy of `main` for phone testing.
-Done when: blank Game scene runs on a phone via the test link; all scripts exist and pass.
+(or equivalent) deploy of `main` for phone testing. Make both `.claude/hooks/*.sh` executable
+(`chmod +x`) and keep `docs/HANDOFF.md` updated from the first commit.
+Done when: blank Game scene runs on a phone via the test link; all scripts exist and pass;
+HANDOFF.md reflects the finished M0 and names the first M1 step.
 
 **M1 — Core feel (day 1)**
 Vehicle + wheel joints, one-finger control, air rotation, eggs on bed with breakage, portrait

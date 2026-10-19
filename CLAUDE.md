@@ -81,7 +81,8 @@ Only open / free licenses that allow commercial use in a monetized game:
 - After every slice: `npm run check` (typecheck, lint, unit tests, build, size check).
   Before claiming a level works: `npm run levels:verify` must pass for it.
 - Commit after each green slice with a short message. Never commit secrets.
-- At the end of each task append 3–5 lines to `docs/PROGRESS.md`: done, next, open issues.
+- Keep `docs/HANDOFF.md` current (see "Handoff" below). Never end a turn that changed files
+  without updating it.
 - Do not refactor unrelated code. Prefer simple, readable code over abstractions.
 - You cannot hear audio. Verify sounds objectively (duration, loudness, peaks, loop seams via
   ffmpeg) and ask the user to listen in the dev Sound Lab before calling a sound done.
@@ -134,7 +135,25 @@ Rules:
 - At the end of each milestone, remind the user to check usage (`/usage`, claude.ai Settings >
   Usage). If more than ~40% of the budget is gone after M1, suggest switching the main agent to
   effort `medium` (Opus 5.5 medium ≈ Opus 5 high).
-- The user runs `/clear` between milestones; keep this file under ~170 lines.
+- The user starts a new session (or runs `/compact`) between milestones; keep this file under
+  ~190 lines.
+
+## Handoff (`docs/HANDOFF.md`): the single source of "where are we"
+- Session start: a SessionStart hook prints HANDOFF.md, recent commits and uncommitted files.
+  Read it, then only the GDD section for the current milestone. Don't re-read everything.
+- After every green slice, before `/compact`, and before ending a turn that changed files:
+  1. Rewrite Current state, Milestones, In progress, Next steps (exact, actionable), Waiting on
+     humans (Sound Lab listens, playtests, publisher replies), Open issues.
+  2. Add new Decisions with date (never delete; mark superseded ones).
+  3. Prepend one Session log entry (3–5 lines: done · next · blockers · budget note).
+  4. Commit it together with the slice.
+- Keep it under ~150 lines: rewrite, don't append; move old log entries to
+  `docs/handoff-archive.md`.
+- Write it for a stranger: file paths, command names, exact next step. No chat history.
+- A Stop hook blocks finishing when files changed since the last handoff update; then just
+  update HANDOFF.md (do not argue with the hook).
+- Subagents don't edit HANDOFF.md; they report back and the main agent updates it.
 
 ## Compact instructions
 When compacting, keep: current milestone, failing checks, file paths touched, open decisions.
+Update `docs/HANDOFF.md` before compacting.
