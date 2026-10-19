@@ -19,7 +19,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Nothing.
+- Camera fix (`ui-builder`): user saw no ground while the box was airborne on desktop.
+  `frameVertical()` in `src/render/camera.ts` frames vehicle + ground (zoom ≥ ×0.75), GDD §6 updated.
 
 ## Next steps (in order)
 1. User tests https://offsyntax.github.io/wobbly-cargo/ on the phone in portrait + landscape and on

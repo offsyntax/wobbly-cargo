@@ -55,6 +55,9 @@ next level or garage upgrade → harder level / new world / new vehicle.
 - Vehicle ~32% from the left; vertical anchor ~55% from top in landscape, ~62% in portrait
   (interpolate by aspect).
 - Dynamic look-ahead (velocity) and speed/air zoom (×0.75–×1.0) on top of the base zoom.
+- Airborne framing: keep the ground under the vehicle in view (frame vehicle + ground with
+  ~12% margins, zoom out down to ×0.75, smoothed ~0.15 s); if it still doesn't fit, the vehicle
+  stays fully visible and the ground may leave the bottom. Never cut off the vehicle.
 - On resize/rotation: recompute zoom and UI layout in the same frame; never restart the level.
 - Parallax: sky (static), skyline/dunes (0.2), far hills (0.45), terrain (1.0). Layers tile
   horizontally and cover the tallest portrait view.
