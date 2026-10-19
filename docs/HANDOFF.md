@@ -16,14 +16,13 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- M1 slice 1 (parallel, disjoint files): `physics-specialist` → vehicle, terrain from JSON, eggs,
-  breakage, fail/finish, events per `src/sim/types.ts`, headless level bot; `svg-artist` →
-  pickup + egg + crate art v1 (DONE: pickup-body, wheel, egg, egg-cracked, egg-splat, crate, flag;
-  metre pivots documented at the top of `art/src/pickup-body.svg`); `sound-designer` → DONE: `src/audio/AudioSystem.ts` (+ `logic.ts`,
-  `src/data/audio.ts`), 24 procedurally generated sounds (143 KB), `sound-lab.html` (dev only).
+- M1 slice 2 (`ui-builder`): wire `GameSim` + art + `AudioSystem` into GameScene.
+- M1 slice 3 (`level-designer`): `src/levels/city-01..03.json`.
 
 ## Next steps (in order)
-1. Finish M1 slice 1 (see In progress); commit each green part.
+1. M1 slice 1 DONE: `src/sim/{level,vehicle,cargo,game}.ts` (`GameSim` API: step/drainEvents/
+   telemetry/cargoState/bodies), data in `src/data/{vehicles,cargo}.ts`, bot `npm run levels:verify`
+   (tsx; policy: hold < 7 m/s on ground, in air hold while nose < 0.2 rad).
 2. M1 slice 2 (`ui-builder`): GameScene draws terrain/vehicle/eggs/flag from sim, camera uses
    `VehicleTelemetry` (groundY, look-ahead, speed/air zoom), minimal HUD, fail/complete overlay +
    instant retry, audio hooked to events/telemetry.
@@ -43,6 +42,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Physics: a 1.5 m ramp onto flat ground breaks eggs at any speed → levels need downslope
+  landings. Eggs survive a 4 m hill ≤ 7 m/s, crack at ≥ 9 m/s.
 - Audio: impulse tiers (2/12/35/90 N·s) and `wheelOmegaAtMax = 40` are guesses → tune against
   real sim impulses when wiring. Stereo pan by screen x not built. kenney.nl / freesound.org are
   blocked by the session proxy (403) → recorded CC0 sources would need network allowlisting.
@@ -70,6 +71,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
+- 2026-10-20 Level schema: `null` in `terrain` splits chains (gap); `platform` may take absolute
+  top `y`. Cargo never collides with wheels (wheel tops poked through the bed floor).
 - 2026-10-20 Audio: all M1 sounds are our own procedural synthesis (`tools/audio.mjs`), MP3 only;
   drop CC0 recordings into `audio/src` with the same names to replace them.
 - 2026-10-20 Camera feel rules (GDD §6 "Smoothness"): interpolation, critically damped follow,
@@ -97,6 +100,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · M1 sim · `GameSim` + Pickup + eggs + rules + bot; check 66 tests, test-01 3★ 17.8 s.
+  Next: GameScene wiring (ui-builder) + city-01..03 (level-designer) in parallel.
 - 2026-10-20 · M1 start · User: camera still not good, postpone, continue M1. Added sim contract
   `src/sim/types.ts`; launched physics / art / sound slices in parallel.
 - 2026-10-20 · camera smoothness · User: camera felt wobbly/shaky. Added render interpolation
