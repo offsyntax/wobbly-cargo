@@ -5,19 +5,19 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-19 · Milestone: **M0 in progress** (hooks executable; scaffold being built)
-- Summary: Concept, engine, art direction, sound spec, licensing, models and budget are decided
-  (see Decisions). No code yet.
+- Date: 2026-10-19 · Milestone: **M0 in progress** (slice 1 done: scaffold + `npm run check`)
+- Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1 scaffold builds; blank Game scene (ground +
+  falling planck box) at 390×844 FIT/letterbox. `npm run check` green (dist 1.5 MB).
 
 ## Milestones
 - [ ] M0 Setup · [ ] M1 Core feel · [ ] M2 Content & meta · [ ] M3 Polish & platform ·
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- M0 slice 1: Vite + TS + Phaser 4 + planck scaffold, blank Game scene, `npm run check`.
+- M0 slice 2: platform adapter (`local`), e2e (Playwright), art pipeline skeleton, remaining scripts.
 
 ## Next steps (in order)
-1. Implement M0 exactly as defined in `docs/GDD.md` §13.
+1. M0 slice 2 (see In progress), then slice 3: GitHub Pages deploy workflow.
 
 ## Waiting on humans
 - Playgama / Mediacube replies (payout terms, Türkiye eligibility, revenue per 1,000 plays).
@@ -39,6 +39,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - 2026-10-19 Licensing: CC0 / CC-BY 4.0 (credited) / OFL / MIT-family only.
 - 2026-10-19 Models: main Opus 5.5 high; subagents per CLAUDE.md table; no ultracode, no Fable.
   Budget ≈ $100 for the playable MVP.
+- 2026-10-19 Vite `base: './'` (relative paths) so the same build works on GitHub Pages and in portal ZIPs.
+- 2026-10-19 Sim stepper clamps at 5 steps/frame and drops extra backlog (no spiral of death).
 
 ## Key files
 - Rules: `CLAUDE.md` · Design & milestones: `docs/GDD.md` · Visual reference: `docs/reference/`
@@ -50,4 +52,6 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 2. Check `git log --oneline -10` and run `npm run check` via `qa-runner` before new work.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-19 · M0 · Hooks chmod +x; scaffold (`src/sim` FixedStepper + tests, Boot/Preload/Game
+  scenes, size check). Next: platform adapter, e2e, art pipeline, Pages deploy.
 - 2026-10-19 · setup · Docs, agent config, visual reference and handoff created. Next: M0.
