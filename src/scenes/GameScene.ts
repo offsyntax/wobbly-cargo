@@ -6,8 +6,7 @@ import en from '../i18n/en.json';
 import { getPlatform } from '../platform';
 
 const W = 390;
-const H = 844;
-const GROUND_TOP = 700;
+const GROUND_H = 144;
 const INK = 0x1e1b2e;
 
 export class GameScene extends Phaser.Scene {
@@ -15,6 +14,7 @@ export class GameScene extends Phaser.Scene {
   private box!: Body;
   private boxGfx!: Phaser.GameObjects.Rectangle;
   private firstFrame = true;
+  private H = 844;
 
   constructor() {
     super('Game');
@@ -22,6 +22,16 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     window.__WC__.scene = 'Game';
+    this.H = this.scale.height;
+    const H = this.H;
+    const GROUND_TOP = H - GROUND_H;
+
+    const onResize = (): void => {
+      if (this.scale.height !== this.H) this.scene.restart();
+    };
+    this.scale.on('resize', onResize);
+    this.events.once('shutdown', () => this.scale.off('resize', onResize));
+    this.firstFrame = true;
 
     // Ground: dirt body, grass strip, ink outline.
     this.add.rectangle(0, GROUND_TOP, W, H - GROUND_TOP, 0x9b6a3e).setOrigin(0, 0);
@@ -56,7 +66,7 @@ export class GameScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     this.stepper.advance(delta / 1000);
     const p = this.box.getPosition();
-    this.boxGfx.setPosition(p.x * PPM, H - p.y * PPM);
+    this.boxGfx.setPosition(p.x * PPM, this.H - p.y * PPM);
     this.boxGfx.setRotation(-this.box.getAngle());
 
     if (this.firstFrame) {
