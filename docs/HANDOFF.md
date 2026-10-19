@@ -5,7 +5,7 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-19 · Milestone: **M0 done** (merged to `main`, deployed to Pages) · Next: **M1 Core feel**
+- Date: 2026-10-20 · Milestone: **M0 done**; responsive-screen slice in progress · Next: **M1**
 - Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Blank Game scene (ground, falling planck
   box, atlas test sprite) at 390×844 FIT/letterbox. Platform interface + `local` adapter (saves,
   pause/resume, ad stubs). All scripts exist and pass: `check` (9 unit tests, dist 1.51 MB),
@@ -17,7 +17,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Nothing.
+- Responsive full-viewport slice (`ui-builder`): Scale RESIZE + DPR, `src/render/camera.ts`
+  (GDD §6 base zoom + anchor), UI camera with safe-area HUD, `src/input/hold.ts`, e2e at 6 sizes
+  + live resize + input. Docs (CLAUDE.md, GDD, ui-builder, reference README) already updated.
 
 ## Next steps (in order)
 1. M1 step 1 (`physics-specialist`): in `src/sim/` build the vehicle (chassis + 2 wheels via
@@ -38,8 +40,7 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
-- Landscape shows a small 390×520 letterboxed view. Decide in M1 (with the camera) whether
-  landscape should instead widen the visible road; ask the user (affects platform constraint 4).
+- Landscape layouts (menus/HUD) need the user's approval via screenshots (portrait + landscape).
 - No web fonts yet (system sans-serif); bundle Lilita One + Nunito in `public/fonts` in M1/M2.
 
 ## Decisions (do not revisit without the user)
@@ -61,7 +62,11 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
-- 2026-10-19 Adaptive portrait: logical width fixed 390, height = clamp(390·vh/vw, 520, 900)
+- 2026-10-20 Screen: responsive full-viewport at every aspect ratio (supersedes portrait-first
+  and the adaptive-portrait decision below). Reason: Playables rules (all aspect ratios, live
+  resize keeping state, no orientation lock, touch + mouse); side-view driving is landscape-native;
+  CrazyGames/Poki traffic is mostly desktop. Camera rule: GDD §6. Input: touch/mouse/Space/↑.
+- 2026-10-19 [SUPERSEDED 2026-10-20] Adaptive portrait: logical width fixed 390, height = clamp(390·vh/vw, 520, 900)
   (`src/scenes/viewport.ts`). Phones fill the screen; wider screens letterbox. Scenes must lay
   out from `this.scale.height` (top-anchored HUD, bottom-anchored ground), never a fixed 844.
 - 2026-10-19 Sim stepper clamps at 5 steps/frame and drops extra backlog (no spiral of death).
@@ -77,6 +82,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · direction change · User: responsive full-viewport, no longer portrait-first.
+  Updated CLAUDE.md (constraints 4, 8), GDD §1/4/6/13/14/15/17, ui-builder agent, reference
+  README. Code slice in progress. Next: commit code slice, user re-tests phone both orientations.
 - 2026-10-19 · M0 follow-up · Repo public, Pages live, PR #1 merged. iPhone showed side bars →
   adaptive logical height (fills phones, letterboxes wide screens), e2e checks 390×664 fill.
   User re-checked on iPhone: OK. Next: M1 vehicle physics.

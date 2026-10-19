@@ -15,7 +15,7 @@ app stores before launch). Version: MVP for web portals.
 - Genre references only (do NOT copy names, art, levels, UI): Eggy Car, Drive Mad,
   Hill Climb Racing.
 
-**Our differentiators:** portrait-first, level-based with stars, several cargo types, garage
+**Our differentiators:** fills every screen, level-based with stars, several cargo types, garage
 upgrades, satisfying crash/splat moments that read well as YouTube Shorts clips.
 
 ## 2. Pillars
@@ -29,11 +29,12 @@ Play level (20–60 s) → result (stars = intact cargo, coins) → optional rew
 next level or garage upgrade → harder level / new world / new vehicle.
 
 ## 4. Controls
-- Hold anywhere: accelerate. Release: brake/coast (strong brake when nearly stopped is NOT
+- One action, same on every input: hold touch anywhere / hold mouse button / hold Space or ↑.
+- Hold: accelerate. Release: brake/coast (strong brake when nearly stopped is NOT
   reverse; no reverse in MVP).
 - In the air, hold: rotate vehicle backward (nose up); release: rotate forward slowly
   (tune so landing flat is learnable).
-- Pause button top-left. That is the entire control scheme.
+- Pause button top-left; Esc or P also pauses. That is the entire control scheme.
 
 ## 5. Physics & rules (src/sim)
 - planck world, gravity −10 m/s², fixed step 1/60, 8 velocity / 3 position iterations.
@@ -47,11 +48,20 @@ next level or garage upgrade → harder level / new world / new vehicle.
 - Terrain: `ChainShape` from level points (smoothed with Catmull-Rom in the editor/loader).
 - Determinism: sim must produce the same result for the same inputs (needed by the level bot).
 
-## 6. Camera (portrait)
-- Vehicle at ~32% from the left, ~55% from the top.
-- Look-ahead based on velocity; zoom out smoothly with speed and when airborne
-  (min 0.75, max 1.0). This compensates for the narrow portrait view. Validate on day 1.
-- Parallax: sky (static), skyline/dunes (0.2), far hills (0.45), terrain (1.0).
+## 6. Screen & camera (responsive)
+- The game fills the viewport at every aspect ratio; the visible world grows, never letterbox.
+- Base zoom (px per metre) = min(viewW / 16 m, viewH / 9 m) (≈80 px/m at 1280×720, ≈120 at
+  1920×1080, ≈24 at 390×844). Starting values, tune in M1.
+- Vehicle ~32% from the left; vertical anchor ~55% from top in landscape, ~62% in portrait
+  (interpolate by aspect).
+- Dynamic look-ahead (velocity) and speed/air zoom (×0.75–×1.0) on top of the base zoom.
+- On resize/rotation: recompute zoom and UI layout in the same frame; never restart the level.
+- Parallax: sky (static), skyline/dunes (0.2), far hills (0.45), terrain (1.0). Layers tile
+  horizontally and cover the tallest portrait view.
+- HUD anchored to corners with safe-area insets, scaled by min(viewW, viewH). Menus have two
+  layouts: portrait = stacked (reference PNGs), landscape = side by side (Garage: vehicle left,
+  upgrades right; Complete: stars/stats left, buttons right).
+- Render for device pixel ratio; never stretch.
 
 ## 7. Content
 ### Worlds (MVP: City; v1.0: City, Desert, Snow)
@@ -207,14 +217,16 @@ Done when: blank Game scene runs on a phone via the test link; all scripts exist
 HANDOFF.md reflects the finished M0 and names the first M1 step.
 
 **M1 — Core feel (day 1)**
-Vehicle + wheel joints, one-finger control, air rotation, eggs on bed with breakage, portrait
-camera with look-ahead/zoom, terrain from JSON, 3 levels, finish line, fail/complete detection,
+Vehicle + wheel joints, one-finger control, air rotation, eggs on bed with breakage, responsive
+camera (§6) with look-ahead/zoom and live resize, terrain from JSON, 3 levels, finish line, fail/complete detection,
 pickup + egg + crate SVG art v1. Core audio wired to physics (§11.1–11.3): engine layers + rev,
 brake/skid, bump/land impacts, egg crack/splat, plus the Sound Lab page.
-Done when: the user plays 3 levels on a phone and says the driving "feels good"; level bot passes.
+Done when: the user plays 3 levels on a phone in portrait AND landscape and on desktop and says
+the driving "feels good"; rotating mid-level keeps the run; level bot passes.
 
 **M2 — Content & meta (day 2)**
-15 City levels, coins, stars, save/load, Complete/Fail/Garage/Menu/Pause screens per reference,
+15 City levels, coins, stars, save/load, Complete/Fail/Garage/Menu/Pause screens per reference
+(portrait + landscape layouts for every screen, §6),
 upgrades affecting physics, Dolmuş unlock.
 Done when: a fresh player can play 15 levels, earn coins, buy an upgrade, and progress persists
 after reload.
@@ -234,7 +246,10 @@ Done when: build submitted to at least one publisher.
 ## 14. QA checklist (must all pass before submission)
 - [ ] Size: total < 5 MB, no file > 30 MB, no pre-compressed assets required.
 - [ ] Network: zero requests to external domains (verify in Playwright network log).
-- [ ] Layout OK at 390×844, 1:1 (600×600) and 16:9 (1280×720): HUD visible, nothing cropped.
+- [ ] Layout fills the viewport at 390×844, 844×390, 600×600, 1280×720, 1920×1080 and
+      2560×1080: no black bars in gameplay, HUD visible, nothing cropped.
+- [ ] Live resize/rotation keeps state (mid-level, mid-air, in menus).
+- [ ] Every action works touch-only, mouse-only and keyboard-only.
 - [ ] Pause/resume and mute/unmute from platform work instantly, including mid-air.
 - [ ] Save survives reload; corrupted save falls back to defaults.
 - [ ] No ad during driving; interstitial frequency rules hold; rewarded grants reward once.
@@ -247,9 +262,10 @@ Done when: build submitted to at least one publisher.
       humans approved all sounds in the Sound Lab; audio total < 1.5 MB.
 
 ## 15. Submission kit (prepare in M4)
-Game ZIP (Playgama: Bridge SDK integrated, portrait), title, short + long description (EN),
+Game ZIP (Playgama: Bridge SDK integrated, orientation "any/both" if asked), title, short + long description (EN),
 512×512 icon, cover/thumbnail images in the sizes each portal requests (check current portal
-specs at submission time), 3–5 screenshots, 15–30 s gameplay video (also reusable as Shorts).
+specs at submission time), 3–5 screenshots in landscape and portrait, 15–30 s gameplay video in 16:9 plus a 9:16 Shorts
+cut.
 
 ## 16. Model, effort & budget plan
 Budget: about $100 of usage for the playable MVP. Main agent: Opus 5.5 at `high` (orchestrates,
@@ -268,8 +284,8 @@ No ultracode, no Fable. `/clear` between milestones. If >40% of the budget is us
 drop the main agent to `medium`.
 
 ## 17. Risks & open questions
-- Portrait side-view may feel cramped → camera zoom/look-ahead must be validated in M1.
+- Portrait phones see less road → validate §6 in M1 in both orientations.
 - Publisher acceptance and revenue share for Türkiye-based individuals are unconfirmed (emails
   sent to Playgama and Mediacube).
 - Revenue per 1,000 plays on Playables is not public (only publisher claims); measure ours.
-- Keep differentiation from Eggy Car clear (levels, stars, garage, multiple cargo, portrait).
+- Keep differentiation from Eggy Car clear (levels, stars, garage, multiple cargo, fills every screen).

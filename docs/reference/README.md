@@ -1,6 +1,9 @@
 # Visual reference
 
 Five approved mockups of the target look (portrait, 390×844 logical px, PNGs rendered @2x).
+They are portrait only and define the style and the components. The game is responsive (GDD §6):
+landscape layouts reuse the same components side by side (e.g. Garage: vehicle left, upgrades
+right; Complete: stars/stats left, buttons right).
 
 | File | Screen |
 |---|---|
@@ -27,6 +30,6 @@ and HUD layout used in the mockup.
 ## Known fixes vs. the mockups
 - `01`: the "HOLD TO DRIVE" circle overlaps the truck. In the game, place the hint lower or
   fade it out as soon as the player holds, so it never covers the vehicle.
-- `01`: the portrait view leaves a lot of empty sky. The camera look-ahead/zoom in GDD §6 should
+- `01`: the portrait view leaves a lot of empty sky. The responsive camera in GDD §6 should
   keep more of the road visible.
 - UI text in mockups is English and placeholder values (coins, levels, prices) are examples.
