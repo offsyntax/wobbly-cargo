@@ -18,7 +18,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 ## In progress
 - M1 slice 1 (parallel, disjoint files): `physics-specialist` → vehicle, terrain from JSON, eggs,
   breakage, fail/finish, events per `src/sim/types.ts`, headless level bot; `svg-artist` →
-  pickup + egg + crate art v1; `sound-designer` → `src/audio/` engine/brake/impact/egg system +
+  pickup + egg + crate art v1 (DONE: pickup-body, wheel, egg, egg-cracked, egg-splat, crate, flag;
+  metre pivots documented at the top of `art/src/pickup-body.svg`); `sound-designer` → `src/audio/` engine/brake/impact/egg system +
   `sound-lab.html` (dev only).
 
 ## Next steps (in order)

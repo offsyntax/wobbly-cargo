@@ -1,0 +1,21 @@
+<!--
+  pickup-body: chassis + cab + open bed, side view facing right, NO wheels. 40 px per metre (1x).
+  Canvas 136x52. Pivot = chassis centre = canvas centre (68,26) -> Phaser origin (0.5, 0.5).
+  Geometry below is the physics outline; the 4 px stroke straddles it (2 px outside).
+  Coordinates in metres relative to the pivot (x right, y UP):
+    chassis extents   x -1.60 .. +1.60, y -0.55 .. +0.55 (cab roof is the top)
+    bed floor (top)   y  0.00, from x -1.45 to -0.05 (interior 1.40 m long)
+    bed rear wall     x -1.60 .. -1.45, top y +0.35 (interior depth 0.35 m)
+    bed front wall    = cab back, x -0.05, rises to the roof
+    cab               x -0.05 .. +1.60, roof y +0.55, hood y +0.13
+    wheel centres     rear (-1.05, -0.45), front (+1.05, -0.45), wheel radius 0.45
+    wheel arches      ellipse rx 0.50 ry 0.42 around each wheel centre
+  Pixel = 68 + 40*x, 26 - 40*y.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="136" height="52" viewBox="0 0 136 52">
+  <path d="M4 15 Q4 12 7 12 L10 12 L10 26 L66 26 L66 8 Q66 4 70 4 L92 4 Q96 4 98 7 L108 19 L126 21 Q132 22 132 28 L132 48 L129.4 48 A20 17 0 0 0 90.6 48 L45.4 48 A20 17 0 0 0 6.6 48 L4 48 Z"
+        fill="#E8443A" stroke="#1E1B2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M72 9 L92 9 L101 19 L72 19 Z" fill="#9ED8F5" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/>
+  <line x1="74" y1="25" x2="80" y2="25" stroke="#1E1B2E" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="127" cy="28" r="2.5" fill="#FFC93C" stroke="#1E1B2E" stroke-width="2"/>
+</svg>
