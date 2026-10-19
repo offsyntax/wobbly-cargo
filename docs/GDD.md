@@ -47,11 +47,19 @@ next level or garage upgrade → harder level / new world / new vehicle.
 - Fail when: all cargo lost, vehicle roof touches ground for > 0.4 s, or vehicle falls off map.
 - Terrain: `ChainShape` from level points (smoothed with Catmull-Rom in the editor/loader).
 - Determinism: sim must produce the same result for the same inputs (needed by the level bot).
+- Feel targets (2026-10-20, user: "like Hill Climb Racing"): weighty but responsive. 0 → top
+  speed ≈ 3 s on flat; release at top speed stops in ≈ 2 s / ≤ 15 m with a visible nose dip;
+  stopped vehicle never rolls back on slopes ≤ 25°; suspension visibly bounces on bumps
+  (≈ 2 oscillations); full air flip with hold ≈ 1.2 s. Braking shows brake lights, rear dust
+  and a squeal; throttle kicks up rear-wheel dust; landings puff dust.
+- Coins: sensor bodies from level `coins`; touching one collects it (`coin` event).
 
 ## 6. Screen & camera (responsive)
 - The game fills the viewport at every aspect ratio; the visible world grows, never letterbox.
-- Base zoom (px per metre) = min(viewW / 16 m, viewH / 9 m) (≈80 px/m at 1280×720, ≈120 at
-  1920×1080, ≈24 at 390×844). Starting values, tune in M1.
+- Base zoom (px per metre), revised 2026-10-20 ("road ahead readable, vehicle not oversized"):
+  zoom = viewH / 12 m, then clamp so the visible width stays within 15–30 m
+  (1280×720 → 60 px/m, 21 m wide; 390×844 → 26 px/m, 15 m wide; 2560×1080 → 90 px/m, 28 m).
+  The truck should take ≈ 12–25% of the view width.
 - Vehicle ~32% from the left; vertical anchor ~55% from top in landscape, ~62% in portrait
   (interpolate by aspect).
 - Dynamic look-ahead (velocity) and speed/air zoom (×0.75–×1.0) on top of the base zoom.

@@ -5,31 +5,41 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-20 · Milestone: **M1 Core feel — playable build, waiting for the user's playtest**
-- Summary: 3 City levels playable end to end: Pickup with suspension, hold to drive/brake, air
-  rotation, 3 eggs with damage/break/lost, fail (cargo/flipped/fell) + complete overlays with
-  instant retry, HUD (pause, level pill, progress, cargo meter, HOLD TO DRIVE hint), parallax,
-  responsive camera with look-ahead + speed/air zoom, procedural audio wired to sim, bundled
-  Lilita One + Nunito. check 70 tests · levels:verify 4/4 3★ · e2e 19/19 · dist 1.77 MB.
+- Date: 2026-10-20 · Milestone: **M1 — "fun slice" gate.** User stopped new content work after the
+  first playtest ("no fun yet"). Goal: ONE hand-crafted 30–40 s level `fun-01` that makes a
+  first-time player say "one more try"; the user plays it and decides whether we continue.
+- Built so far (on `main`): GameSim (pickup, eggs, rules, bot), city-01..03 (judged weak),
+  procedural audio (judged bad), HUD/overlays, responsive camera, art v1 (judged weak).
 
 ## Milestones
 - [x] M0 Setup · [ ] M1 Core feel · [ ] M2 Content & meta · [ ] M3 Polish & platform ·
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Nothing.
+- `physics-specialist`: HCR feel retune (GDD §5 targets), firm release brake + `telemetry.braking`,
+  low bed walls (top y +0.30) and lively eggs, coins as sensors, `land.perfect`, obstacle props
+  (`seesaw`, `log`, `rocks`, `bumpRow`) in `src/data/props.ts`.
+- `svg-artist`: pickup redraw (geometry in GDD-aligned numbers: wheels r 0.36 at ±1.15/−0.50, bed
+  floor +0.05, walls +0.30), egg hairline/cracked/splat + yolk/shell particles, skyline buildings
+  with windows + clouds + hills from reference 01/02, obstacle sprites, sparkle/confetti/dust, HUD
+  icons from the reference.
 
 ## Next steps (in order)
-1. User playtests https://offsyntax.github.io/wobbly-cargo/ (phone portrait + landscape, desktop):
-   driving feel, egg fragility, camera, sounds. Collect concrete notes (what, when, which level).
-2. Tune from the notes: driving feel → `physics-specialist` (`src/data/vehicles.ts`, `cargo.ts`);
-   camera → `src/render/camera.ts` constants; levels → `level-designer`; sounds → `sound-designer`.
-3. Sound Lab is dev-only (`npm run dev` → `/sound-lab.html`); if the user can't run dev, propose a
-   Pages-only build mode that also ships `sound-lab.html` (never in `npm run zip`).
-4. M1 is done when the user says the driving "feels good" in both orientations + desktop and
-   rotating mid-level keeps the run. Then M2 (GDD §13).
+1. `level-designer`: `src/levels/fun-01.json` (30–40 s): small bumps, dip, ramp jump, gap, steep
+   hill, rocks, final drop; ≥ 3 obstacle types; a cargo threat every 3–5 s. Default level = fun-01.
+2. `ui-builder` A (no GameScene edits): `src/render/background.ts` (3 parallax layers + clouds from
+   reference sprites) + HUD rework per reference (pause, level pill, coins, progress, cargo meter;
+   safe area at every size; HOLD hint never cropped) + camera zoom rule (GDD §6 revised).
+3. `ui-builder` B (owns GameScene): juice — landing dust, shake by impulse, chassis squash, coin pop
+   + sparkle + rising-pitch combo, PERFECT LANDING text, finish confetti, near-break 0.3 s slow-mo +
+   cargo-meter wobble, funny fail (eggs fly, slow-mo, splat on screen), egg crack states, brake
+   lights/dust; then integrate A.
+4. Screenshots: landscape, portrait, crash moment; compare with reference 01/02; merge; test link.
+5. Sounds: after the user allows kenney.nl / opengameart.org / freesound.org (pending).
 
 ## Waiting on humans
+- User: add kenney.nl, opengameart.org, freesound.org to the environment's Allowed domains
+  (needed for recorded CC0 sounds).
 - Sound Lab listen (`npm run dev` → `/sound-lab.html`): engine crossfades/loop clicks, rev/landing
   dip, impact tiers, squeak, egg crack/splat, rattle level. All 24 sounds are synthetic.
 - Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
@@ -73,6 +83,10 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
+- 2026-10-20 Feel overhaul after the user's first playtest: Hill Climb Racing-style feel (targets
+  in GDD §5), firm release brake with feedback, pickup redesigned (smaller wheels, raised bed),
+  coins collectable, levels redesigned, sounds replaced by CC0 recordings once the user allows
+  kenney.nl / opengameart.org / freesound.org in the environment's network settings.
 - 2026-10-20 Level schema: `null` in `terrain` splits chains (gap); `platform` may take absolute
   top `y`. Cargo never collides with wheels (wheel tops poked through the bed floor).
 - 2026-10-20 Audio: all M1 sounds are our own procedural synthesis (`tools/audio.mjs`), MP3 only;
@@ -102,6 +116,9 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · fun-slice gate · User playtest: brake empty, sounds bad, truck ugly, coins useless,
+  levels weak, no fun. User: stop content, build ONE fun level + juice + real background + HUD per
+  reference. Camera zoom rule revised (GDD §6). Feel targets in GDD §5.
 - 2026-10-20 · M1 playable · GameScene wired (`src/render/worldRenderer.ts`, `src/ui/{kit,Hud,
   Overlay}.ts`, `src/levels/index.ts`), fonts bundled, atlas @3x, audio tiers tuned. All checks
   green. Merged to main for the playtest. Next: user notes → tuning.
