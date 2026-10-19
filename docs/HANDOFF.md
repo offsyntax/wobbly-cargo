@@ -5,14 +5,12 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-20 · Milestone: **M0 done** + responsive-screen slice done (merged to `main` via PR #3, Pages redeploys) ·
-  Next: **M1**
-- Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Full-viewport canvas (Scale.NONE, manual
-  resize, backing store × min(DPR, 2)); world camera zoom = GDD §6 base zoom; HUD on a UI camera
-  with safe-area insets; hold input (touch/mouse/Space/↑), Esc/P pause; live resize keeps state. Platform interface + `local` adapter (saves,
-  pause/resume, ad stubs). All scripts exist and pass: `check` (21 unit tests, dist 1.52 MB),
-  `e2e` (10 tests: 6 sizes fill, live resize, input, touch, DPR 3; no errors/external requests), `art`, `art:preview`,
-  `levels:verify` (0 levels yet), `zip` (394 KB), `audio` (no sources yet).
+- Date: 2026-10-20 · Milestone: **M1 Core feel — playable build, waiting for the user's playtest**
+- Summary: 3 City levels playable end to end: Pickup with suspension, hold to drive/brake, air
+  rotation, 3 eggs with damage/break/lost, fail (cargo/flipped/fell) + complete overlays with
+  instant retry, HUD (pause, level pill, progress, cargo meter, HOLD TO DRIVE hint), parallax,
+  responsive camera with look-ahead + speed/air zoom, procedural audio wired to sim, bundled
+  Lilita One + Nunito. check 70 tests · levels:verify 4/4 3★ · e2e 19/19 · dist 1.77 MB.
 
 ## Milestones
 - [x] M0 Setup · [ ] M1 Core feel · [ ] M2 Content & meta · [ ] M3 Polish & platform ·
@@ -22,16 +20,18 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Nothing.
 
 ## Next steps (in order)
-1. User tests https://offsyntax.github.io/wobbly-cargo/ on the phone in portrait + landscape and on
-   desktop (fills screen, no bars, rotating keeps the run, hold/Space/P work).
-2. M1 step 1 (`physics-specialist`): vehicle in `src/sim/` (chassis + 2 wheels via planck
-   `WheelJoint`, suspension Hz/damping from `src/data/vehicles.ts`, rear motor), driven by
-   `src/input/hold.ts` (hold = throttle, release = brake; in air hold = nose up) on a flat +
-   one-ramp test terrain; deterministic unit test. Camera follows it via `src/render/camera.ts`.
-3. Then terrain from level JSON + look-ahead/speed zoom (§6), cargo + breakage, finish/fail,
-   art v1, core audio + Sound Lab (§11).
+1. User playtests https://offsyntax.github.io/wobbly-cargo/ (phone portrait + landscape, desktop):
+   driving feel, egg fragility, camera, sounds. Collect concrete notes (what, when, which level).
+2. Tune from the notes: driving feel → `physics-specialist` (`src/data/vehicles.ts`, `cargo.ts`);
+   camera → `src/render/camera.ts` constants; levels → `level-designer`; sounds → `sound-designer`.
+3. Sound Lab is dev-only (`npm run dev` → `/sound-lab.html`); if the user can't run dev, propose a
+   Pages-only build mode that also ships `sound-lab.html` (never in `npm run zip`).
+4. M1 is done when the user says the driving "feels good" in both orientations + desktop and
+   rotating mid-level keeps the run. Then M2 (GDD §13).
 
 ## Waiting on humans
+- Sound Lab listen (`npm run dev` → `/sound-lab.html`): engine crossfades/loop clicks, rev/landing
+  dip, impact tiers, squeak, egg crack/splat, rattle level. All 24 sounds are synthetic.
 - Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
   Every push to `main` redeploys. User verified on iPhone 2026-10-19: portrait fills the screen,
   landscape letterboxes (390×520 centered) as intended. M0 phone test PASSED.
@@ -42,6 +42,15 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Levels may be too forgiving: holding all the time never breaks an egg on city-01..03 (only
+  damage). Fine for teaching levels; confirm with the user's playtest.
+- Physics: a 1.5 m ramp onto flat ground breaks eggs at any speed → levels need downslope
+  landings. Eggs survive a 4 m hill ≤ 7 m/s, crack at ≥ 9 m/s.
+- Audio: impact tiers tuned from bot runs (0.8/1.9/4/12 N·s, `wheelOmegaAtMax` 31); the bot rarely
+  lands hard → retune the hard tier from human runs. Stereo pan by screen x not built. kenney.nl / freesound.org are
+  blocked by the session proxy (403) → recorded CC0 sources would need network allowlisting.
+- Camera still not good enough for the user (2026-10-20, "hatalar var"): revisit in M1 with
+  the vehicle; ask the user exactly when it looks wrong (fall, landing, resize?) and record video.
 - Landscape layouts (menus/HUD) need the user's approval via screenshots (portrait + landscape).
 - No web fonts yet (system sans-serif); bundle Lilita One + Nunito in `public/fonts` in M1/M2.
 
@@ -64,6 +73,10 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   for dev, `playables`/`playgama` in M3.
 - 2026-10-19 Replies to the user are in Turkish (game UI text stays English).
 - 2026-10-19 Phone test hosting: repo made public so free GitHub Pages works (user's choice).
+- 2026-10-20 Level schema: `null` in `terrain` splits chains (gap); `platform` may take absolute
+  top `y`. Cargo never collides with wheels (wheel tops poked through the bed floor).
+- 2026-10-20 Audio: all M1 sounds are our own procedural synthesis (`tools/audio.mjs`), MP3 only;
+  drop CC0 recordings into `audio/src` with the same names to replace them.
 - 2026-10-20 Camera feel rules (GDD §6 "Smoothness"): interpolation, critically damped follow,
   dead zone, zoom hysteresis; e2e guards it (`CAM_D2_MAX = 0.01`). Tune values in M1 with the vehicle.
 - 2026-10-20 Rendering: Phaser 4.2.1 has no `resolution` option → `Scale.NONE`, canvas backing
@@ -89,6 +102,13 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · M1 playable · GameScene wired (`src/render/worldRenderer.ts`, `src/ui/{kit,Hud,
+  Overlay}.ts`, `src/levels/index.ts`), fonts bundled, atlas @3x, audio tiers tuned. All checks
+  green. Merged to main for the playtest. Next: user notes → tuning.
+- 2026-10-20 · M1 sim · `GameSim` + Pickup + eggs + rules + bot; check 66 tests, test-01 3★ 17.8 s.
+  Next: GameScene wiring (ui-builder) + city-01..03 (level-designer) in parallel.
+- 2026-10-20 · M1 start · User: camera still not good, postpone, continue M1. Added sim contract
+  `src/sim/types.ts`; launched physics / art / sound slices in parallel.
 - 2026-10-20 · camera smoothness · User: camera felt wobbly/shaky. Added render interpolation
   (`src/render/interp.ts`), `CameraRig` (smoothDamp, ±10% dead zone, zoom hysteresis), e2e
   `camera smoothness` (max |Δ² scrollY| 0.022 → 0.0046). Merged to main. Next: user re-test, M1.

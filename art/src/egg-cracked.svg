@@ -1,0 +1,6 @@
+<!-- egg-cracked: damage state of egg, same size and pivot (canvas 22x26, centre (11,13)). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="26" viewBox="0 0 22 26">
+  <path d="M11 3.5 C15.5 3.5 18.5 9.5 18.5 15 C18.5 19.5 15.2 22.5 11 22.5 C6.8 22.5 3.5 19.5 3.5 15 C3.5 9.5 6.5 3.5 11 3.5 Z" fill="#FFF8EC" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="8" cy="10" rx="1.6" ry="2.6" fill="#FFFFFF" transform="rotate(20 8 10)"/>
+  <path d="M4.5 13 L8 15.5 L10.5 12 L13.5 16 L16 13 L18 14.5" fill="none" stroke="#1E1B2E" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

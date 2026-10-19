@@ -134,17 +134,17 @@ test.describe('touch', () => {
 });
 
 for (const { w, h } of [{ w: 1920, h: 1080 }, { w: 844, h: 390 }]) {
-  test(`airborne: ground and box visible ${w}x${h}`, async ({ page }) => {
+  test(`vehicle and ground visible at spawn ${w}x${h}`, async ({ page }) => {
     await page.setViewportSize({ width: w, height: h });
     await page.goto('/');
     await page.waitForFunction(() => window.__WC__?.ready === true);
-    const samples: { steps: number; top: number; bottom: number; boxY: number }[] = [];
+    const samples: { steps: number; top: number; bottom: number; vehicleY: number }[] = [];
     for (let i = 0; i < 40; i++) {
       const s = await page.evaluate(() => ({
         steps: window.__WC__.simSteps,
         top: window.__WC__.view.top,
         bottom: window.__WC__.view.bottom,
-        boxY: window.__WC__.boxY,
+        vehicleY: window.__WC__.vehicleY,
       }));
       if (s.steps >= 40) break;
       samples.push(s);
@@ -155,60 +155,52 @@ for (const { w, h } of [{ w: 1920, h: 1080 }, { w: 844, h: 390 }]) {
     for (const s of samples) {
       expect(s.bottom).toBeLessThanOrEqual(0);
       expect(s.top).toBeGreaterThanOrEqual(0);
-      expect(s.boxY).toBeGreaterThan(0.5);
-      expect(s.boxY).toBeLessThanOrEqual(s.top);
-      expect(s.boxY).toBeGreaterThanOrEqual(s.bottom);
+      expect(s.vehicleY).toBeGreaterThan(0.3);
+      expect(s.vehicleY).toBeLessThanOrEqual(s.top);
+      expect(s.vehicleY).toBeGreaterThanOrEqual(s.bottom);
     }
   });
 }
 
-// Camera smoothness. The log runs >= 3 s wall AND >= 300 sim steps (software GL at 1920x1080 is slow).
-// d2 = vertical camera acceleration in m, normalised to a 60 Hz frame (uneven headless frame times
-// would otherwise inflate a plain second difference). Measured smooth max is far below CAM_D2_MAX;
-// the old 0.15 s lerp rig measured well above it on the landing.
+// Camera smoothness on the real vehicle. d2 = vertical camera acceleration in m, normalised to a 60 Hz frame
+// (uneven headless frame times would otherwise inflate a plain second difference).
 const CAM_D2_MAX = 0.01;
 for (const { w, h } of [{ w: 1920, h: 1080 }, { w: 390, h: 844 }]) {
   test(`camera smoothness ${w}x${h}`, async ({ page }) => {
     await page.setViewportSize({ width: w, height: h });
-    await page.goto('/?camlog=1');
+    await page.goto('/?level=test-01&camlog=1');
     await page.waitForFunction(() => window.__WC__?.ready === true);
-    await page.waitForFunction(
-      () => {
-        const l = window.__WC__.camLog;
-        return !!l && l.length > 1 && l[l.length - 1]!.t - l[0]!.t >= 3000 && l[l.length - 1]!.steps >= 300;
-      },
-      undefined,
-      { timeout: 60_000 },
-    );
+    // phase 1: at rest. The dead-zone target must not move once the suspension has settled.
+    await page.waitForFunction(() => window.__WC__.simSteps >= 150, undefined, { timeout: 60_000 });
+    const restEnd = await page.evaluate(() => window.__WC__.camLog!.length);
+    // phase 2: drive for 4 s of sim time.
+    await page.keyboard.down('Space');
+    const s0 = await steps(page);
+    await page.waitForFunction((n) => window.__WC__.simSteps >= n + 240, s0, { timeout: 60_000 });
+    await page.keyboard.up('Space');
+    await page.waitForFunction((n) => window.__WC__.simSteps >= n + 300, s0, { timeout: 60_000 });
     const log = await page.evaluate(() => window.__WC__.camLog!);
-    expect(log.length).toBeGreaterThan(20);
+    expect(log.length).toBeGreaterThan(30);
 
-    // zoom velocity sign changes
+    const range = (v: number[]): number => Math.max(...v) - Math.min(...v);
+    const rest = log.slice(Math.floor(restEnd / 2), restEnd);
+    expect(range(rest.map((e) => e.ty))).toBeLessThan(0.05);
+    expect(range(rest.map((e) => e.sy))).toBeLessThan(0.05);
+
+    // zoom: speed zoom eases out while accelerating and back in after release (at most two direction changes)
     let signs = 0;
     let last = 0;
-    for (let i = 1; i < log.length; i++) {
+    for (let i = restEnd + 1; i < log.length; i++) {
       const dz = log[i]!.zoom - log[i - 1]!.zoom;
       if (Math.abs(dz) < 1e-9 * log[i]!.zoom) continue;
-      const s = Math.sign(dz);
-      if (last !== 0 && s !== last) signs++;
-      last = s;
+      const sg = Math.sign(dz);
+      if (last !== 0 && sg !== last) signs++;
+      last = sg;
     }
-    expect(signs).toBeLessThanOrEqual(1);
-
-    // After the box first lands (centre at rest height, <= 0.55 m): the dead-zone target must not move at
-    // all from the landing on, and the camera itself (spring tail from the fall) must be still 2 s later.
-    const landed = log.findIndex((e) => e.boxY <= 0.55);
-    expect(landed).toBeGreaterThan(0);
-    const range = (v: number[]): number => Math.max(...v) - Math.min(...v);
-    const tyTravel = range(log.slice(landed).map((e) => e.ty));
-    const settled = log.filter((e) => e.t >= log[landed]!.t + 2000);
-    expect(settled.length).toBeGreaterThan(5);
-    const syTravel = range(settled.map((e) => e.sy));
-    expect(tyTravel).toBeLessThan(0.05);
-    expect(syTravel).toBeLessThan(0.05);
+    expect(signs).toBeLessThanOrEqual(2);
 
     let d2 = 0;
-    for (let i = 2; i < log.length; i++) {
+    for (let i = restEnd + 2; i < log.length; i++) {
       const a = log[i - 2]!;
       const b = log[i - 1]!;
       const c = log[i]!;
@@ -218,7 +210,95 @@ for (const { w, h } of [{ w: 1920, h: 1080 }, { w: 390, h: 844 }]) {
       const acc = ((c.sy - b.sy) / d2t - (b.sy - a.sy) / d1) / ((d1 + d2t) / 2);
       d2 = Math.max(d2, Math.abs(acc) / 3600);
     }
-    console.log(`CAMLOG ${w}x${h} frames=${log.length} zoomSignChanges=${signs} tyTravel=${tyTravel.toFixed(4)} syTravelSettled=${syTravel.toFixed(4)} maxD2=${d2.toFixed(5)}`);
+    console.log(`CAMLOG ${w}x${h} frames=${log.length} zoomSignChanges=${signs} maxD2=${d2.toFixed(5)}`);
     expect(d2).toBeLessThan(CAM_D2_MAX);
   });
 }
+
+// --- gameplay -------------------------------------------------------------------------------------------
+
+test('holding Space for 3 s of sim time drives the vehicle at least 10 m', async ({ page }) => {
+  const problems = watch(page);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto('/?level=test-01');
+  await page.waitForFunction(() => window.__WC__?.ready === true);
+  await page.waitForFunction(() => window.__WC__.simSteps >= 60);
+  const x0 = await page.evaluate(() => window.__WC__.vehicleX);
+  const s0 = await steps(page);
+  await page.keyboard.down('Space');
+  await page.waitForFunction((n) => window.__WC__.simSteps >= n + 180, s0, { timeout: 60_000 });
+  await page.keyboard.up('Space');
+  const x1 = await page.evaluate(() => window.__WC__.vehicleX);
+  expect(x1 - x0).toBeGreaterThanOrEqual(10);
+  expect(problems).toEqual([]);
+});
+
+test('default level is city-01, ?level selects test-01 with 3 eggs', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto('/');
+  await page.waitForFunction(() => window.__WC__?.ready === true);
+  expect(await page.evaluate(() => window.__WC__.level)).toBe('city-01');
+  await page.goto('/?level=test-01');
+  await page.waitForFunction(() => window.__WC__?.ready === true && window.__WC__.level === 'test-01');
+  expect(await page.evaluate(() => window.__WC__.cargoLeft)).toBe(3);
+});
+
+for (const { w, h } of [{ w: 390, h: 844 }, { w: 844, h: 390 }]) {
+  test(`test-01 run ends in an overlay inside the viewport ${w}x${h}`, async ({ page }) => {
+    test.setTimeout(150_000);
+    const problems = watch(page);
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/?level=test-01');
+    await page.waitForFunction(() => window.__WC__?.ready === true);
+    await page.keyboard.down('Space');
+    await page.waitForFunction(() => ['complete', 'fail'].includes(window.__WC__.state), undefined, { timeout: 90_000, polling: 250 });
+    await page.keyboard.up('Space');
+    const end = await page.evaluate(() => ({ state: window.__WC__.state, o: window.__WC__.overlay, b: window.__WC__.buttons }));
+    expect(['complete', 'fail']).toContain(end.state);
+    expect(end.o).not.toBeNull();
+    const o = end.o!;
+    expect(o.x).toBeGreaterThanOrEqual(0);
+    expect(o.y).toBeGreaterThanOrEqual(0);
+    expect(o.x + o.w).toBeLessThanOrEqual(w);
+    expect(o.y + o.h).toBeLessThanOrEqual(h);
+    expect(end.b.length).toBeGreaterThan(0);
+    for (const b of end.b) {
+      expect(b.w).toBeGreaterThanOrEqual(44);
+      expect(b.h).toBeGreaterThanOrEqual(44);
+      expect(b.x).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.w).toBeLessThanOrEqual(w);
+      expect(b.y + b.h).toBeLessThanOrEqual(h);
+    }
+    await page.screenshot({ path: `test-results/overlay-${end.state}-${w}x${h}.png` });
+    expect(problems).toEqual([]);
+  });
+}
+
+test('Retry is instant, a held key does not drive until pressed again, R and the button both retry', async ({ page }) => {
+  const problems = watch(page);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto('/?level=test-01');
+  await page.waitForFunction(() => window.__WC__?.ready === true);
+  await page.keyboard.down('Space');
+  await page.waitForFunction(() => ['complete', 'fail'].includes(window.__WC__.state), undefined, { timeout: 90_000, polling: 250 });
+  // Space is still down: R retries, the held key must not drive
+  await page.keyboard.press('r');
+  expect(await page.evaluate(() => window.__WC__.state)).toBe('play');
+  expect(await page.evaluate(() => window.__WC__.held)).toBe(false);
+  const s0 = await steps(page);
+  await page.waitForFunction((n) => window.__WC__.simSteps >= n + 45, s0, { timeout: 30_000 });
+  expect(await page.evaluate(() => window.__WC__.vehicleX)).toBeLessThan(3.5);
+  await page.keyboard.up('Space');
+  await page.keyboard.down('Space');
+  expect(await page.evaluate(() => window.__WC__.held)).toBe(true);
+  await page.keyboard.up('Space');
+
+  // pause overlay: the button resumes without driving
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.__WC__.state)).toBe('paused');
+  const btn = await page.evaluate(() => window.__WC__.buttons[0]!);
+  await page.mouse.click(btn.x + btn.w / 2, btn.y + btn.h / 2);
+  expect(await page.evaluate(() => window.__WC__.state)).toBe('play');
+  expect(await page.evaluate(() => window.__WC__.held)).toBe(false);
+  expect(problems).toEqual([]);
+});

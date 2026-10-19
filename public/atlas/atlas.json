@@ -1,23 +1,163 @@
 {
   "frames": {
-    "test-dot": {
+    "crate": {
       "frame": {
-        "x": 2,
+        "x": 992,
         "y": 2,
-        "w": 96,
-        "h": 96
+        "w": 72,
+        "h": 72
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 96,
-        "h": 96
+        "w": 72,
+        "h": 72
       },
       "sourceSize": {
-        "w": 96,
-        "h": 96
+        "w": 72,
+        "h": 72
+      }
+    },
+    "egg-cracked": {
+      "frame": {
+        "x": 924,
+        "y": 2,
+        "w": 66,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 66,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 66,
+        "h": 78
+      }
+    },
+    "egg-splat": {
+      "frame": {
+        "x": 1066,
+        "y": 2,
+        "w": 156,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 156,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 156,
+        "h": 66
+      }
+    },
+    "egg": {
+      "frame": {
+        "x": 856,
+        "y": 2,
+        "w": 66,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 66,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 66,
+        "h": 78
+      }
+    },
+    "flag": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 174,
+        "h": 318
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 174,
+        "h": 318
+      },
+      "sourceSize": {
+        "w": 174,
+        "h": 318
+      }
+    },
+    "pickup-body": {
+      "frame": {
+        "x": 178,
+        "y": 2,
+        "w": 408,
+        "h": 156
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 408,
+        "h": 156
+      },
+      "sourceSize": {
+        "w": 408,
+        "h": 156
+      }
+    },
+    "test-dot": {
+      "frame": {
+        "x": 588,
+        "y": 2,
+        "w": 144,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 144
+      }
+    },
+    "wheel": {
+      "frame": {
+        "x": 734,
+        "y": 2,
+        "w": 120,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 120,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 120,
+        "h": 120
       }
     }
   },
@@ -26,9 +166,9 @@
     "image": "atlas.png",
     "format": "RGBA8888",
     "size": {
-      "w": 128,
-      "h": 128
+      "w": 2048,
+      "h": 512
     },
-    "scale": "2"
+    "scale": "3"
   }
 }

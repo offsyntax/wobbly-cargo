@@ -1,0 +1,5 @@
+<!-- egg: physics radius 0.22 m. Canvas 22x26, pivot = centre (11,13), origin (0.5,0.5). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="26" viewBox="0 0 22 26">
+  <path d="M11 3.5 C15.5 3.5 18.5 9.5 18.5 15 C18.5 19.5 15.2 22.5 11 22.5 C6.8 22.5 3.5 19.5 3.5 15 C3.5 9.5 6.5 3.5 11 3.5 Z" fill="#FFF8EC" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="8" cy="10" rx="1.6" ry="2.6" fill="#FFFFFF" transform="rotate(20 8 10)"/>
+</svg>
