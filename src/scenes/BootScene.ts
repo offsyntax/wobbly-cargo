@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getPlatform } from '../platform';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -6,6 +7,8 @@ export class BootScene extends Phaser.Scene {
   }
   create(): void {
     window.__WC__.scene = 'Boot';
-    this.scene.start('Preload');
+    void getPlatform()
+      .init()
+      .then(() => this.scene.start('Preload'));
   }
 }

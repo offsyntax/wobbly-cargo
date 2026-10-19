@@ -6,7 +6,7 @@ export class PreloadScene extends Phaser.Scene {
   }
   preload(): void {
     window.__WC__.scene = 'Preload';
-    // Atlas / audio loading comes in later slices.
+    this.load.atlas('atlas', 'atlas/atlas.png', 'atlas/atlas.json');
   }
   create(): void {
     this.scene.start('Game');

@@ -6,6 +6,6 @@ export default tseslint.config(
   { ignores: ['dist', 'coverage', 'node_modules', 'public', 'test-results', 'playwright-report'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  { files: ['src/**/*.ts'], languageOptions: { globals: globals.browser } },
+  { files: ['src/**/*.ts', 'e2e/**/*.ts'], languageOptions: { globals: globals.browser } },
   { files: ['tools/**/*.mjs', '*.config.*'], languageOptions: { globals: globals.node } },
 );

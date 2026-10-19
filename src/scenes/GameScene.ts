@@ -3,6 +3,7 @@ import { Box, Vec2, type Body } from 'planck';
 import { PPM } from '../sim/constants';
 import { FixedStepper, createWorld } from '../sim/world';
 import en from '../i18n/en.json';
+import { getPlatform } from '../platform';
 
 const W = 390;
 const H = 844;
@@ -14,9 +15,6 @@ export class GameScene extends Phaser.Scene {
   private box!: Body;
   private boxGfx!: Phaser.GameObjects.Rectangle;
   private firstFrame = true;
-  private onVisibility = () => {
-    if (this.stepper) this.stepper.paused = document.hidden;
-  };
 
   constructor() {
     super('Game');
@@ -46,10 +44,13 @@ export class GameScene extends Phaser.Scene {
 
     this.boxGfx = this.add.rectangle(0, 0, PPM, PPM, 0xe8443a).setStrokeStyle(4, INK);
 
-    document.addEventListener('visibilitychange', this.onVisibility);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
-      document.removeEventListener('visibilitychange', this.onVisibility),
-    );
+    this.add.image(W - 40, 60, 'atlas', 'test-dot').setDisplaySize(32, 32);
+
+    const platform = getPlatform();
+    platform.onPause(() => (this.stepper.paused = true));
+    platform.onResume(() => (this.stepper.paused = false));
+    platform.onAudioChange((on) => (this.sound.mute = !on));
+    this.sound.mute = !platform.isAudioEnabled();
   }
 
   override update(_time: number, delta: number): void {
@@ -61,6 +62,7 @@ export class GameScene extends Phaser.Scene {
     if (this.firstFrame) {
       this.firstFrame = false;
       window.__WC__.ready = true;
+      getPlatform().gameReady();
     }
   }
 }
