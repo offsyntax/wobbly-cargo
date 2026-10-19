@@ -30,4 +30,39 @@ export const ZOOM_MUL_MAX = 1;
 export function clampZoomMul(m: number): number {
   return clamp(m, ZOOM_MUL_MIN, ZOOM_MUL_MAX);
 }
-// TODO(M1): look-ahead offset and speed/air zoom multiplier driver.
+// TODO(M1): groundY from terrain; look-ahead offset and speed/air zoom multiplier driver.
+
+export interface FrameInput {
+  /** Vehicle y, metres, up-positive. */
+  vehicleY: number;
+  /** Ground height under the vehicle, metres, up-positive. */
+  groundY: number;
+  viewW: number;
+  viewH: number;
+  baseZoom: number;
+  /** Vehicle screen y as a fraction of view height from the top. */
+  anchorY: number;
+  /** Top/bottom margin as a fraction of view height (default 0.12). */
+  margin?: number;
+}
+
+/**
+ * Vertical framing target (GDD section 6). Returns the world y (m, up-positive) at the view centre and a
+ * zoom multiplier. Normal anchor framing when the ground fits below the vehicle; otherwise frame
+ * ground..vehicle with margins, zooming out to ZOOM_MUL_MIN; past that the vehicle stays visible near the
+ * top margin and the ground falls off the bottom.
+ */
+export function frameVertical(i: FrameInput): { centerY: number; zoomMul: number } {
+  const m = i.margin ?? 0.12;
+  const viewHm = (mul: number): number => i.viewH / (i.baseZoom * mul);
+  const h1 = viewHm(1);
+  const height = Math.max(0, i.vehicleY - i.groundY);
+  if (height <= (1 - i.anchorY - m) * h1) {
+    return { centerY: i.vehicleY + (i.anchorY - 0.5) * h1, zoomMul: 1 };
+  }
+  const needH = height / (1 - 2 * m);
+  const zoomMul = clampZoomMul(i.viewH / (i.baseZoom * needH));
+  const h = viewHm(zoomMul);
+  if (needH <= h + 1e-9) return { centerY: (i.vehicleY + i.groundY) / 2, zoomMul };
+  return { centerY: i.vehicleY + m * h - h / 2, zoomMul };
+}

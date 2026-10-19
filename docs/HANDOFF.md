@@ -5,7 +5,7 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-20 · Milestone: **M0 done** + responsive-screen slice done (on branch, not yet on `main`) ·
+- Date: 2026-10-20 · Milestone: **M0 done** + responsive-screen slice done (merged to `main` via PR #3, Pages redeploys) ·
   Next: **M1**
 - Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Full-viewport canvas (Scale.NONE, manual
   resize, backing store × min(DPR, 2)); world camera zoom = GDD §6 base zoom; HUD on a UI camera
@@ -22,8 +22,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Nothing.
 
 ## Next steps (in order)
-1. Merge `claude/intelligent-ritchie-e4z909` into `main` (needs the user's OK) so Pages redeploys;
-   user tests the phone in portrait + landscape and desktop (fills screen, rotate keeps the run).
+1. User tests https://offsyntax.github.io/wobbly-cargo/ on the phone in portrait + landscape and on
+   desktop (fills screen, no bars, rotating keeps the run, hold/Space/P work).
 2. M1 step 1 (`physics-specialist`): vehicle in `src/sim/` (chassis + 2 wheels via planck
    `WheelJoint`, suspension Hz/damping from `src/data/vehicles.ts`, rear motor), driven by
    `src/input/hold.ts` (hold = throttle, release = brake; in air hold = nose up) on a flat +
@@ -87,10 +87,13 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · camera fix · User: no ground visible while airborne on desktop. Added
+  `frameVertical()` (frames vehicle + ground, zoom ≥ ×0.75, 0.15 s smoothing; `GROUND_Y_M` →
+  terrain height in M1), drop height 6 m, e2e 12/12. Merged to main. Next: user re-test, M1.
 - 2026-10-20 · direction change · User: responsive full-viewport, no longer portrait-first.
   Docs updated (CLAUDE.md 4/8, GDD §1/4/6/13/14/15/17, ui-builder, reference README). Code:
   `src/render/{camera,view}.ts`, `src/input/hold.ts`, GameScene/main rewritten, e2e 10/10.
-  Next: merge to main + phone test both orientations, then M1 vehicle.
+  Merged to main (PR #3). Next: user phone test both orientations, then M1 vehicle.
 - 2026-10-19 · M0 follow-up · Repo public, Pages live, PR #1 merged. iPhone showed side bars →
   adaptive logical height (fills phones, letterboxes wide screens), e2e checks 390×664 fill.
   User re-checked on iPhone: OK. Next: M1 vehicle physics.

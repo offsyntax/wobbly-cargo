@@ -6,11 +6,11 @@ import { viewMetrics } from './render/view';
 
 declare global {
   interface Window {
-    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number } };
+    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number }; view: { top: number; bottom: number }; boxY: number };
   }
 }
 
-window.__WC__ = { ready: false, scene: '', held: false, paused: false, simSteps: 0, hud: { x: 0, y: 0, w: 0, h: 0 } };
+window.__WC__ = { ready: false, scene: '', held: false, paused: false, simSteps: 0, hud: { x: 0, y: 0, w: 0, h: 0 }, view: { top: 0, bottom: 0 }, boxY: 0 };
 
 // Full-viewport canvas: backing store = CSS size x DPR (capped at 2); CSS stretches it to 100% of #game
 // (same size, so it is never upscaled). Scale.NONE + our own resize keeps the backing size exact.
