@@ -1,7 +1,7 @@
 # Wobbly Cargo — agent instructions
 
-Portrait 2D physics driving game for web portals. Drive with one finger and deliver fragile
-cargo (eggs, ice cream) to the finish without breaking it. Full design, milestones and
+Responsive (fills any screen) 2D physics driving game for web portals. Drive with one finger
+or one key and deliver fragile cargo (eggs, ice cream) to the finish without breaking it. Full design, milestones and
 checklists: `docs/GDD.md`. Read it at the start of each milestone, not every turn.
 
 Distribution order: YouTube Playables (via Playgama / Mediacube) → CrazyGames → Poki →
@@ -17,13 +17,16 @@ later mobile (Capacitor). Game UI text is English; strings live in `src/i18n/en.
 2. Ship plain files. Do not rely on pre-compressed .gz/.br assets.
 3. Zero external network calls at runtime: no CDNs, no Google Fonts, no analytics, no fetch to
    other domains. Fonts, sounds and images are bundled.
-4. Portrait first (design size 390×844 logical px). Must also render correctly at 1:1 and 16:9
-   (letterbox, never crop the HUD).
+4. Responsive, full-viewport: playable at every aspect ratio, fills the viewport (no
+   letterbox/pillarbox in gameplay; the visible world grows instead), adapts live on resize
+   without losing state, never locks orientation, text/art crisp at every size and DPR, HUD
+   anchored to edges + safe-area insets. Test sizes: 390×844, 844×390, 600×600, 1280×720,
+   1920×1080. Camera rule: GDD §6.
 5. Respect platform pause / resume and audio on/off immediately (stop sim, mute all audio).
 6. Saves only through the platform adapter (`src/platform`). No direct localStorage in game code.
 7. Ads only through the platform adapter. No banners. Never show an ad during active driving.
-8. One-finger control, works with touch and mouse. Understandable in ~10 seconds, no tutorial
-   longer than one screen.
+8. One-input control: hold touch / hold mouse / hold Space or ↑ (touch + mouse are Playables
+   MUSTs). Understandable in ~10 seconds, no tutorial longer than one screen.
 9. ≥ 30 FPS on mid-range phones, first playable frame < 5 s on 4G.
 
 ## Architecture

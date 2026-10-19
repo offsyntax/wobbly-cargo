@@ -2,45 +2,42 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { GameScene } from './scenes/GameScene';
-import { LOGICAL_W, logicalHeight } from './scenes/viewport';
+import { viewMetrics } from './render/view';
 
 declare global {
   interface Window {
-    __WC__: { ready: boolean; scene: string };
+    __WC__: { ready: boolean; scene: string; held: boolean; paused: boolean; simSteps: number; hud: { x: number; y: number; w: number; h: number } };
   }
 }
 
-window.__WC__ = { ready: false, scene: '' };
+window.__WC__ = { ready: false, scene: '', held: false, paused: false, simSteps: 0, hud: { x: 0, y: 0, w: 0, h: 0 } };
 
-function viewportSize(): { w: number; h: number } {
-  const vv = window.visualViewport;
-  return vv ? { w: vv.width, h: vv.height } : { w: window.innerWidth, h: window.innerHeight };
-}
-function currentHeight(): number {
-  const { w, h } = viewportSize();
-  return logicalHeight(w, h);
-}
-
+// Full-viewport canvas: backing store = CSS size x DPR (capped at 2); CSS stretches it to 100% of #game
+// (same size, so it is never upscaled). Scale.NONE + our own resize keeps the backing size exact.
+const m0 = viewMetrics();
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  width: LOGICAL_W,
-  height: currentHeight(),
+  width: m0.pxW,
+  height: m0.pxH,
   backgroundColor: '#9ED8F5',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scale: { mode: Phaser.Scale.NONE },
   input: { activePointers: 2 },
   scene: [BootScene, PreloadScene, GameScene],
 });
 
-let timer: number | undefined;
+let raf = 0;
+function applySize(): void {
+  const m = viewMetrics();
+  if (m.pxW !== game.scale.width || m.pxH !== game.scale.height) game.scale.resize(m.pxW, m.pxH);
+}
 function onViewportChange(): void {
-  window.clearTimeout(timer);
-  timer = window.setTimeout(() => {
-    const h = currentHeight();
-    if (h !== game.scale.gameSize.height) game.scale.setGameSize(LOGICAL_W, h);
-    game.scale.refresh();
-  }, 100);
+  applySize(); // same frame as the event; scene re-layouts from the scale 'resize' event
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(applySize); // catch late dvh / visualViewport settling
 }
 window.addEventListener('resize', onViewportChange);
 window.addEventListener('orientationchange', onViewportChange);
 window.visualViewport?.addEventListener('resize', onViewportChange);
+const host = document.getElementById('game');
+if (host && typeof ResizeObserver !== 'undefined') new ResizeObserver(onViewportChange).observe(host);
