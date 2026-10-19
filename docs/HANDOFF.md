@@ -5,31 +5,29 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-20 · Milestone: **M0 done** + responsive-screen slice done (merged to `main` via PR #3, Pages redeploys) ·
-  Next: **M1**
+- Date: 2026-10-20 · Milestone: **M1 Core feel in progress** (M0 done, responsive + camera work on `main`)
 - Summary: Vite + TS + Phaser 4.2.1 + planck 1.5.1. Full-viewport canvas (Scale.NONE, manual
-  resize, backing store × min(DPR, 2)); world camera zoom = GDD §6 base zoom; HUD on a UI camera
-  with safe-area insets; hold input (touch/mouse/Space/↑), Esc/P pause; live resize keeps state. Platform interface + `local` adapter (saves,
-  pause/resume, ad stubs). All scripts exist and pass: `check` (21 unit tests, dist 1.52 MB),
-  `e2e` (10 tests: 6 sizes fill, live resize, input, touch, DPR 3; no errors/external requests), `art`, `art:preview`,
-  `levels:verify` (0 levels yet), `zip` (394 KB), `audio` (no sources yet).
+  resize, backing store × min(DPR, 2)); `CameraRig` (GDD §6); HUD on a UI camera with safe-area
+  insets; hold input (touch/mouse/Space/↑), Esc/P pause; live resize keeps state. Sim ↔ consumer
+  contract: `src/sim/types.ts` (SimInput, SimEvent, VehicleTelemetry). All scripts pass.
 
 ## Milestones
 - [x] M0 Setup · [ ] M1 Core feel · [ ] M2 Content & meta · [ ] M3 Polish & platform ·
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Nothing.
+- M1 slice 1 (parallel, disjoint files): `physics-specialist` → vehicle, terrain from JSON, eggs,
+  breakage, fail/finish, events per `src/sim/types.ts`, headless level bot; `svg-artist` →
+  pickup + egg + crate art v1; `sound-designer` → `src/audio/` engine/brake/impact/egg system +
+  `sound-lab.html` (dev only).
 
 ## Next steps (in order)
-1. User tests https://offsyntax.github.io/wobbly-cargo/ on the phone in portrait + landscape and on
-   desktop (fills screen, no bars, rotating keeps the run, hold/Space/P work).
-2. M1 step 1 (`physics-specialist`): vehicle in `src/sim/` (chassis + 2 wheels via planck
-   `WheelJoint`, suspension Hz/damping from `src/data/vehicles.ts`, rear motor), driven by
-   `src/input/hold.ts` (hold = throttle, release = brake; in air hold = nose up) on a flat +
-   one-ramp test terrain; deterministic unit test. Camera follows it via `src/render/camera.ts`.
-3. Then terrain from level JSON + look-ahead/speed zoom (§6), cargo + breakage, finish/fail,
-   art v1, core audio + Sound Lab (§11).
+1. Finish M1 slice 1 (see In progress); commit each green part.
+2. M1 slice 2 (`ui-builder`): GameScene draws terrain/vehicle/eggs/flag from sim, camera uses
+   `VehicleTelemetry` (groundY, look-ahead, speed/air zoom), minimal HUD, fail/complete overlay +
+   instant retry, audio hooked to events/telemetry.
+3. M1 slice 3 (`level-designer`): `city-01..03` per GDD difficulty curve; `levels:verify` ≥ 2 stars.
+4. Merge to `main`; user plays 3 levels on phone (portrait + landscape) and desktop.
 
 ## Waiting on humans
 - Test link is LIVE (repo public, Pages on, PR #1 merged): https://offsyntax.github.io/wobbly-cargo/
@@ -42,6 +40,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 - Portrait side-view may feel cramped → validate camera zoom/look-ahead in M1.
 - Exact Playables / Playgama SDK method names must be verified against official docs (M3).
 - Phaser chunk is 1.58 MB raw (404 kB gzip); fine for budget, revisit custom build in M3.
+- Camera still not good enough for the user (2026-10-20, "hatalar var"): revisit in M1 with
+  the vehicle; ask the user exactly when it looks wrong (fall, landing, resize?) and record video.
 - Landscape layouts (menus/HUD) need the user's approval via screenshots (portrait + landscape).
 - No web fonts yet (system sans-serif); bundle Lilita One + Nunito in `public/fonts` in M1/M2.
 
@@ -89,6 +89,8 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
 3. Never run `playwright install`; `npm run e2e` uses the pinned Playwright + preinstalled Chromium.
 
 ## Session log (newest first, max 10 entries; 3–5 lines each)
+- 2026-10-20 · M1 start · User: camera still not good, postpone, continue M1. Added sim contract
+  `src/sim/types.ts`; launched physics / art / sound slices in parallel.
 - 2026-10-20 · camera smoothness · User: camera felt wobbly/shaky. Added render interpolation
   (`src/render/interp.ts`), `CameraRig` (smoothDamp, ±10% dead zone, zoom hysteresis), e2e
   `camera smoothness` (max |Δ² scrollY| 0.022 → 0.0046). Merged to main. Next: user re-test, M1.
