@@ -5,7 +5,7 @@ Keep the top sections short and current (rewrite them; don't append). Only the S
 grows; keep the last 10 entries here and move older ones to `docs/handoff-archive.md`.
 
 ## Current state
-- Date: 2026-10-19 · Milestone: **pre-M0** (repo contains only docs and agent config)
+- Date: 2026-10-19 · Milestone: **M0 in progress** (hooks executable; scaffold being built)
 - Summary: Concept, engine, art direction, sound spec, licensing, models and budget are decided
   (see Decisions). No code yet.
 
@@ -14,7 +14,7 @@ grows; keep the last 10 entries here and move older ones to `docs/handoff-archiv
   [ ] M4 QA & submission  (definitions: `docs/GDD.md` §13)
 
 ## In progress
-- Nothing.
+- M0 slice 1: Vite + TS + Phaser 4 + planck scaffold, blank Game scene, `npm run check`.
 
 ## Next steps (in order)
 1. Implement M0 exactly as defined in `docs/GDD.md` §13.
